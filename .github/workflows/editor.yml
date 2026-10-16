@@ -56,7 +56,7 @@ jobs:
           [ "${{ steps.analyze.outcome }}" = "success" ] && [ "${{ steps.test.outcome }}" = "success" ]
   windows:
     if: ${{ !contains(github.event.head_commit.message, '[quick]') }}
-    runs-on: windows-latest
+    runs-on: windows-2022
     defaults:
       run:
         working-directory: editor
