@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart' show CustomPainter, Listenable;
 import '../game/battle.dart';
 import '../game/core.dart';
 import '../game/data.dart';
-import '../game/map.dart';
 import 'ctx2d.dart';
 import 'sprites.dart';
 import 'terrain.dart';
@@ -113,7 +112,6 @@ class Assets {
 bool fogVisible(int c) => S.fog[c] == 2;
 
 /* ---------- юниты ---------- */
-const List<String> _sideId = ['ua', 'ru'];
 
 void drawMen(Ctx2D g, Squad sq) {
   final s = sq.side;

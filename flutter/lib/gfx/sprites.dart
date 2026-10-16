@@ -1,7 +1,6 @@
 // Процедурные спрайты техники и бойцов (перенос 05b_sprites.js).
 // Корпус и башня — отдельные картинки: башня вращается независимо.
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import '../game/core.dart';
