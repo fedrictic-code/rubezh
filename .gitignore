@@ -5,3 +5,12 @@ android/local.properties
 android/app/src/main/assets/www/
 .idea/
 *.iml
+flutter/build/
+flutter/.dart_tool/
+flutter/ci_out/
+flutter/android/
+flutter/ios/
+flutter/macos/
+flutter/web/
+flutter/.metadata
+flutter/pubspec.lock
