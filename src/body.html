@@ -29,24 +29,26 @@
         <button class="cmd2" data-cmd="mount">Посадка<kbd>G</kbd></button>
         <button class="cmd2" data-cmd="dismount">Высадка<kbd>D</kbd></button>
       </div>
+      <div class="rowb">
+        <div id="abil">
+          <button class="ab" data-ab="drone" aria-label="Разведывательный БПЛА"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M5 5l5 5M19 5l-5 5M5 19l5-5M19 19l-5-5"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg><span>Q</span><em></em><u></u></button>
+          <button class="ab" data-ab="fpv" aria-label="FPV-удар"><svg viewBox="0 0 24 24"><path d="M3 12 21 4l-6 17-3-7z"/></svg><span>Z</span><em></em><u></u></button>
+          <button class="ab" data-ab="smoke" aria-label="Дымовая завеса"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-7.9A5.5 5.5 0 0 1 17 8.5a3.7 3.7 0 0 1 .5 7.5z"/><path d="M8 21h8"/></svg><span>E</span><em></em><u></u></button>
+          <button class="ab" data-ab="arty" aria-label="Артиллерия"><svg viewBox="0 0 24 24"><path d="M4 18 14 8l3 3L7 21z"/><path d="M15 7l2-2 3 3-2 2M3 8h4M5 4v4"/></svg><span>T</span><em></em><u></u></button>
+        </div>
       <div id="cmds">
         <button class="cmd" data-cmd="move"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg>Движение<kbd>M</kbd></button>
         <button class="cmd" data-cmd="fight"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>Атака<kbd>A</kbd></button>
         <button class="cmd" data-cmd="hold"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7z"/></svg>Окопаться<kbd>H</kbd></button>
         <button class="cmd" data-cmd="retreat"><svg viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg>Отход<kbd>R</kbd></button>
         <button class="cmd" data-cmd="fire" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="5"/><path d="M12 9 17 2M3 21h18"/></svg>Огонь<kbd>F</kbd></button>
-        <button class="cmd deck" data-cmd="deck"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Подкрепление<kbd>B</kbd></button>
+        <button class="cmd deck" data-cmd="deck"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Резерв<kbd>B</kbd></button>
       </div>
       </div>
-      <div id="abil">
-        <button class="ab" data-ab="drone" aria-label="Разведывательный БПЛА"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M5 5l5 5M19 5l-5 5M5 19l5-5M19 19l-5-5"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg><span>Q</span><em></em><u></u></button>
-        <button class="ab" data-ab="fpv" aria-label="FPV-удар"><svg viewBox="0 0 24 24"><path d="M3 12 21 4l-6 17-3-7z"/></svg><span>Z</span><em></em><u></u></button>
-        <button class="ab" data-ab="smoke" aria-label="Дымовая завеса"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-7.9A5.5 5.5 0 0 1 17 8.5a3.7 3.7 0 0 1 .5 7.5z"/><path d="M8 21h8"/></svg><span>E</span><em></em><u></u></button>
-        <button class="ab" data-ab="arty" aria-label="Артиллерия"><svg viewBox="0 0 24 24"><path d="M4 18 14 8l3 3L7 21z"/><path d="M15 7l2-2 3 3-2 2M3 8h4M5 4v4"/></svg><span>T</span><em></em><u></u></button>
       </div>
     </div>
 
-    <div id="deployBar" hidden><div><b>Расстановка</b><span>Коснитесь отряда, затем точки в подсвеченной зоне</span></div><button class="go" id="deployGo">Начать бой</button></div>
+    <div id="deployBar" hidden><div><b>Расстановка</b><span>Коснитесь отряда, затем точки в зоне</span></div><button class="go" id="deployGo">Начать бой</button></div>
     <section id="deck" class="sheet" hidden></section>
   </div>
 
