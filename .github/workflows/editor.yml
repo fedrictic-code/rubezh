@@ -1,0 +1,104 @@
+name: Редактор
+on:
+  push:
+    branches: [main]
+    paths: ['editor/**', 'flutter/lib/**', 'flutter/pubspec.yaml', '.github/workflows/editor.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: editor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: '3.29.3', channel: stable, cache: true }
+      - name: Подготовка
+        run: |
+          mkdir -p ci_out
+          flutter create --platforms=web --project-name rubezh_editor . > ci_out/create.txt 2>&1 || true
+          rm -f test/widget_test.dart
+          flutter pub get > ci_out/pubget.txt 2>&1 || (cat ci_out/pubget.txt; exit 1)
+      - name: analyze
+        id: analyze
+        continue-on-error: true
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings > ci_out/analyze.txt 2>&1
+      - name: test
+        id: test
+        continue-on-error: true
+        run: flutter test --reporter expanded > ci_out/test.txt 2>&1
+      - name: Ранняя диагностика
+        if: always()
+        continue-on-error: true
+        run: bash ../flutter/ci/publish.sh "stage=early analyze=${{ steps.analyze.outcome }} test=${{ steps.test.outcome }}" "${{ github.sha }}" "${{ github.repository }}" "${{ secrets.GITHUB_TOKEN }}" ci-out-editor
+      - name: Web (для снимков)
+        id: web
+        if: ${{ !contains(github.event.head_commit.message, '[quick]') }}
+        continue-on-error: true
+        run: flutter build web --release > ci_out/web.txt 2>&1
+      - name: Снимки
+        if: steps.web.outcome == 'success'
+        continue-on-error: true
+        run: |
+          pip install playwright > /dev/null && python -m playwright install --with-deps chromium > /dev/null
+          (cd build/web && python -m http.server 8098 > /dev/null 2>&1 &)
+          sleep 2
+          python ci/shot.py ci_out http://localhost:8098 $(cat ci/screens.txt) > ci_out/shot.txt 2>&1
+      - name: Диагностика
+        if: always()
+        run: bash ../flutter/ci/publish.sh "analyze=${{ steps.analyze.outcome }} test=${{ steps.test.outcome }} web=${{ steps.web.outcome }}" "${{ github.sha }}" "${{ github.repository }}" "${{ secrets.GITHUB_TOKEN }}" ci-out-editor
+      - name: Итог
+        if: always()
+        run: |
+          [ "${{ steps.analyze.outcome }}" = "success" ] && [ "${{ steps.test.outcome }}" = "success" ]
+  windows:
+    if: ${{ !contains(github.event.head_commit.message, '[quick]') }}
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: editor
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: '3.29.3', channel: stable, cache: true }
+      - name: Сборка для Windows
+        id: build
+        continue-on-error: true
+        run: |
+          mkdir -p ci_out
+          flutter create --platforms=windows --project-name rubezh_editor . > ci_out/create.txt 2>&1 || true
+          rm -f test/widget_test.dart
+          flutter pub get > ci_out/pubget.txt 2>&1
+          flutter build windows --release > ci_out/win.txt 2>&1
+      - name: Упаковка
+        id: pack
+        if: steps.build.outcome == 'success'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Copy-Item -Recurse build/windows/x64/runner/Release out/RubezhEditor
+          Compress-Archive -Path out/RubezhEditor -DestinationPath RubezhEditor-windows.zip -Force
+      - uses: actions/upload-artifact@v4
+        if: steps.pack.outcome == 'success'
+        with:
+          name: RubezhEditor-windows
+          path: editor/RubezhEditor-windows.zip
+      - name: Релиз editor-latest
+        if: steps.pack.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view editor-latest > /dev/null 2>&1 || gh release create editor-latest --title "Редактор «Рубежа» для Windows" --notes "Распакуйте архив и запустите rubezh_editor.exe. Собирается автоматически после каждого изменения." --prerelease
+          gh release upload editor-latest RubezhEditor-windows.zip --clobber
+      - name: Диагностика
+        if: always()
+        run: |
+          tail -n 300 ci_out/win.txt > ci_out/win.tail.txt 2>/dev/null || true
+          bash ../flutter/ci/publish.sh "build=${{ steps.build.outcome }} pack=${{ steps.pack.outcome }}" "${{ github.sha }}" "${{ github.repository }}" "${{ secrets.GITHUB_TOKEN }}" ci-out-win
+      - name: Итог
+        if: always()
+        run: '[ "${{ steps.build.outcome }}" = "success" ]'

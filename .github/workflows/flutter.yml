@@ -65,6 +65,16 @@ jobs:
       - name: Диагностика в ветку ci-out
         if: always()
         run: bash ci/publish.sh "analyze=${{ steps.analyze.outcome }} test=${{ steps.test.outcome }} apk=${{ steps.apk.outcome }} web=${{ steps.web.outcome }}" "${{ github.sha }}" "${{ github.repository }}" "${{ secrets.GITHUB_TOKEN }}"
+      - name: APK в релиз apk-latest (для скачивания на телефон и из редактора)
+        if: steps.apk.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk rubezh.apk
+          gh release view apk-latest > /dev/null 2>&1 || gh release create apk-latest --title "Рубеж — последняя сборка" --notes "Собирается автоматически после каждого изменения." --prerelease
+          gh release upload apk-latest rubezh.apk --clobber
+          echo "${{ github.sha }}" > apk-sha.txt && gh release upload apk-latest apk-sha.txt --clobber
       - uses: actions/upload-artifact@v4
         if: steps.apk.outcome == 'success'
         with:
