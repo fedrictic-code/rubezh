@@ -218,7 +218,7 @@ function renderHud(now) {
 function startBattle() {
   sndInit(); const fc = [null, null]; fc[side] = forceList(side); newBattle(side, diff, fc); buildTerrain(); fogCv = null; fogBig = null; paused = false; E.bPause.innerHTML = IC.pause; setSpeed(1); UI.mode = null; UI.menu = false; UI.pings.length = 0; selSig = ''; deckSig = ''; E.deck.hidden = true; E.log.innerHTML = '';
   E.menu.hidden = true; E.force.hidden = true; E.end.hidden = true; E.hud.hidden = false; setMode(null); S.deploying = true; paused = true; E.hud.classList.add('deploying'); E.deployMsg.hidden = false; E.deployGo.hidden = false;
-  cam.z = clamp(VIEW.w / 1500, .38, .85); cam.x = side === 0 ? 1740 : 330; cam.y = 740; clampCam(); acc = 0;
+  cam.z = clamp(VIEW.w / 1300, .2, .85); cam.x = side === 0 ? 1740 : 330; cam.y = 740; clampCam(); acc = 0;
   if (false) toast(side === S.atk ? 'Возьмите село Дубки и высоту 112 и держите их ' + HOLD_NEED + ' с. Выберите отряд и коснитесь карты.' : 'Продержитесь ' + (LIMIT / 60) + ' минут. Не отдавайте село Дубки и высоту 112.', 6000);
 }
 function beginBattle() {

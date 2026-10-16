@@ -7,11 +7,11 @@ const wsx = x => (x - cam.x) * cam.z + VIEW.w / 2, wsy = y => (y - cam.y) * cam.
 const s2w = (sx, sy) => [(sx - VIEW.w / 2) / cam.z + cam.x, (sy - VIEW.h / 2) / cam.z + cam.y];
 
 function resizeView() {
-  const r = cv.getBoundingClientRect(); VIEW.dpr = Math.min(2, window.devicePixelRatio || 1); VIEW.w = Math.max(1, r.width); VIEW.h = Math.max(1, r.height);
+  const r = cv.getBoundingClientRect(); VIEW.dpr = Math.min(1.5, window.devicePixelRatio || 1); VIEW.w = Math.max(1, r.width); VIEW.h = Math.max(1, r.height);
   cv.width = Math.round(VIEW.w * VIEW.dpr); cv.height = Math.round(VIEW.h * VIEW.dpr); clampCam();
 }
 function clampCam() {
-  const minZ = Math.max(VIEW.w / W, VIEW.h / H); cam.z = clamp(cam.z, minZ, 2.2);
+  const minZ = Math.min(VIEW.w / W, VIEW.h / H); cam.z = clamp(cam.z, minZ, 2.2);
   const hw = VIEW.w / 2 / cam.z, hh = VIEW.h / 2 / cam.z;
   cam.x = hw * 2 >= W ? W / 2 : clamp(cam.x, hw, W - hw); cam.y = hh * 2 >= H ? H / 2 : clamp(cam.y, hh, H - hh);
 }
