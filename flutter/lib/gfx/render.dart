@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart' show CustomPainter, Listenable;
 import '../game/battle.dart';
 import '../game/core.dart';
 import '../game/data.dart';
+import '../game/fxcfg.dart';
 import 'ctx2d.dart';
 import 'sprites.dart';
 import 'terrain.dart';
@@ -54,11 +55,16 @@ void clampCam() {
 }
 
 /// Картинки, которые строятся один раз или по событию.
+/// Местность «Переправы», нарисованная кодом.
+Future<ui.Image> renderTerrainImage() => renderTerrain();
+
 class Assets {
   static ui.Image? terrain;
   static ui.Image? fog;
   static bool fogBusy = false;
   static final List<List<double>> craters = [];
+  /// Картинки эффектов из мода (путь → изображение).
+  static final Map<String, ui.Image> fxImg = {};
   static const int fogK = 2; // во сколько раз сглаженный туман подробнее сетки (дальше сглаживает видеокарта)
   static Uint8List? _fogPrev;
 
@@ -558,18 +564,24 @@ class WorldPainter extends CustomPainter {
         continue;
       }
       if (!(fogVisible(cellIdx(t.x1, t.y1)) || fogVisible(cellIdx(t.x0, t.y0)))) continue;
-      final f = age / t.life, a = math.max(0.0, f - .4), b = math.min(1.0, f + .15);
-      g.stroke = t.side == 0 ? rgba(255, 238, 170, .95) : rgba(255, 170, 130, .95);
-      g.lineWidth = math.max(.9, 1.3 / cam.z * .8);
+      final f = age / t.life, a = math.max(0.0, f - FX.tracerLen * .73), b = math.min(1.0, f + FX.tracerLen * .27);
+      g.stroke = ui.Color(t.side == 0 ? FX.tracerUa : FX.tracerRu);
+      g.lineWidth = math.max(.9, FX.tracerWidth / cam.z * .8);
       g.line(lerp(t.x0, t.x1, a), lerp(t.y0, t.y1, a), lerp(t.x0, t.x1, b), lerp(t.y0, t.y1, b));
     }
     for (final p in S.pend) {
       if (p.kind == 'shot' && S.t < p.at) {
         final f = (S.t - p.t0) / (p.at - p.t0), x = lerp(p.ax, p.x1, f), y = lerp(p.ay, p.y1, f);
         if (!(fogVisible(cellIdx(x, y)) || fogVisible(cellIdx(p.ax, p.ay)))) continue;
-        g.stroke = rgba(255, 236, 190, .85);
-        g.lineWidth = 1.6;
-        g.line(lerp(p.ax, p.x1, math.max(0.0, f - .12)), lerp(p.ay, p.y1, math.max(0.0, f - .12)), x, y);
+        final tr = FX.missileTrail;
+        if (FX.missileSmokeOn && !UI.lite) {
+          g.stroke = ui.Color(FX.missileSmoke);
+          g.lineWidth = FX.missileWidth * 2.2;
+          g.line(lerp(p.ax, p.x1, math.max(0.0, f - tr * 3)), lerp(p.ay, p.y1, math.max(0.0, f - tr * 3)), lerp(p.ax, p.x1, math.max(0.0, f - tr)), lerp(p.ay, p.y1, math.max(0.0, f - tr)));
+        }
+        g.stroke = ui.Color(FX.missile);
+        g.lineWidth = FX.missileWidth;
+        g.line(lerp(p.ax, p.x1, math.max(0.0, f - tr)), lerp(p.ay, p.y1, math.max(0.0, f - tr)), x, y);
       }
     }
     g.cap = ui.StrokeCap.butt;
@@ -584,15 +596,35 @@ class WorldPainter extends CustomPainter {
       if (!fogVisible(cellIdx(e.x, e.y))) continue;
       final p = age / e.life;
       if (e.kind == 1) {
-        g.fill = rgba(255, 224, 150, (1 - p) * .9);
-        g.fillCircle(e.x, e.y, e.r * (.6 + p));
+        final fc = ui.Color(FX.flash);
+        g.fill = fc.withValues(alpha: fc.a * (1 - p));
+        g.fillCircle(e.x, e.y, e.r * FX.flashSize * (.6 + p));
         continue;
       }
-      g.fill = rgba(70, 60, 52, (1 - p) * .5);
-      g.fillCircle(e.x, e.y - p * 8, e.r * (.7 + p * 1.1));
+      final bf = e.kind == 2 ? FX.big : FX.boom;
+      final r = e.r * bf.size;
+      final spr = bf.sprite == null ? null : Assets.fxImg[bf.sprite!];
+      if (spr != null) {
+        final s = r * 2.4 * (.7 + p * .6);
+        g.alpha = 1 - p * p;
+        g.imageAt(spr, e.x - s / 2, e.y - s / 2, s, s);
+        g.alpha = 1;
+        continue;
+      }
+      final sc = ui.Color(bf.smoke), fc = ui.Color(bf.fire);
+      g.fill = sc.withValues(alpha: (1 - p) * .5 * sc.a);
+      g.fillCircle(e.x, e.y - p * 8, r * (.7 + p * 1.1));
       if (p < .5) {
-        g.fill = rgba(255, 190, 90, (1 - p * 2) * .9);
-        g.fillCircle(e.x, e.y, e.r * (.4 + p * 1.1));
+        g.fill = fc.withValues(alpha: (1 - p * 2) * .9 * fc.a);
+        g.fillCircle(e.x, e.y, r * (.4 + p * 1.1));
+      }
+      if (bf.sparks > 0 && p < .6 && !UI.lite) {
+        g.stroke = fc.withValues(alpha: (1 - p / .6) * fc.a);
+        g.lineWidth = 1.2;
+        for (int i = 0; i < bf.sparks; i++) {
+          final a = (i * 2.399 + e.x * .01) % TAU, d0 = r * (.3 + p * 1.6), d1 = d0 + r * .35;
+          g.line(e.x + math.cos(a) * d0, e.y + math.sin(a) * d0, e.x + math.cos(a) * d1, e.y + math.sin(a) * d1);
+        }
       }
     }
     // дым

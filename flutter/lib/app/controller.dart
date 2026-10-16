@@ -8,6 +8,7 @@ import '../game/battle.dart';
 import '../game/combat.dart';
 import '../game/core.dart';
 import '../game/data.dart';
+import '../game/mapdef.dart';
 import '../gfx/render.dart';
 import 'fx.dart';
 import 'loop.dart';
@@ -434,6 +435,7 @@ class GameCtl extends ChangeNotifier {
   void startBattle() {
     final fc = <List<String>>[[], []];
     fc[APP.side] = APP.forceList(APP.side);
+    applyMap(CUR_MAP);
     newBattle(APP.side, APP.diff, fc);
     Assets.fog?.dispose();
     Assets.fog = null;
@@ -453,8 +455,9 @@ class GameCtl extends ChangeNotifier {
     _owners.clear();
     S.deploying = true;
     cam.z = clamp(View.w / 1300, .2, .85);
-    cam.x = APP.side == 0 ? 1740 : 330;
-    cam.y = 740;
+    final z = ZONE[APP.side];
+    cam.x = APP.side == 0 && CUR_MAP.builtin ? 1740 : (APP.side == 1 && CUR_MAP.builtin ? 330 : (z.x0 + z.x1) / 2);
+    cam.y = CUR_MAP.builtin ? 740 : (z.y0 + z.y1) / 2;
     clampCam();
     acc = 0;
     APP.endInfo = null;

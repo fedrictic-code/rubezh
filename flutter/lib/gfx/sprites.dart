@@ -611,21 +611,49 @@ class SpriteCache {
   static const _ty = {'bradley': .1, 'bmp2': -.06};
 
   /// Рисует все нужные спрайты заранее (асинхронно); потом доступ синхронный.
-  static Future<void> warm() async {
+  /// [img] — загрузка картинки мода по пути (своя графика техники и бойцов), [soldiers] — сторона → вид бойца → путь.
+  static Future<void> warm({Future<ui.Image?> Function(String path)? img, Map<String, dynamic>? soldiers, Map<String, Variant>? looks}) async {
+    veh.clear();
     for (final v in VARIANTS) {
       if (!v.veh) continue;
+      final art = v.art;
+      ui.Image? hullImg, turImg;
+      if (art != null && img != null) {
+        if (art.hull != null) hullImg = await img(art.hull!);
+        if (art.turret != null) turImg = await img(art.turret!);
+      }
       for (final side in v.sides) {
         final key = '${v.id}$side';
-        if (veh.containsKey(key)) continue;
-        final hull = await spHull(v, side), tu = await spTurret(v, side);
-        veh[key] = VehSprite(hull, tu, v.len + 3, v.wid + 3, v.len * (_tx[v.id] ?? .05), v.wid * (_ty[v.id] ?? 0));
+        if (hullImg != null) {
+          final hw = (v.len + 3) * art!.scale, hh = hw * hullImg.height / hullImg.width;
+          final ti = turImg ?? await _blank();
+          final tw = turImg == null ? 1.0 : hw * ti.width / hullImg.width, th = turImg == null ? 1.0 : tw * ti.height / ti.width;
+          veh[key] = VehSprite(hullImg, TurretSprite(ti, tw, th), hw, hh, v.len * art.tx, v.wid * art.ty);
+          continue;
+        }
+        // нарисованный кодом вид: свой или взятый у другого юнита («look»)
+        final src = (v.look != null ? looks?[v.look] : null) ?? v;
+        final hull = await spHull(src, side), tu = await spTurret(src, side);
+        veh[key] = VehSprite(hull, tu, src.len + 3, src.wid + 3, src.len * (_tx[src.id] ?? .05), src.wid * (_ty[src.id] ?? 0));
       }
     }
     for (final side in [0, 1]) {
       for (final k in const ['rifle', 'lead', 'gren', 'mg', 'at', 'sniper']) {
-        sol['$side$k'] = await soldierSprite(side, k);
+        final p = (soldiers?['$side'] as Map<String, dynamic>?)?[k] as String?;
+        final custom = (p != null && img != null) ? await img(p) : null;
+        sol['$side$k'] = custom != null ? SolSprite(custom, 2.9) : await soldierSprite(side, k);
       }
     }
+  }
+
+  static ui.Image? _blankImg;
+  static Future<ui.Image> _blank() async {
+    if (_blankImg != null) return _blankImg!;
+    final rec = ui.PictureRecorder();
+    ui.Canvas(rec);
+    final pic = rec.endRecording();
+    _blankImg = await pic.toImage(1, 1);
+    return _blankImg!;
   }
 
   static VehSprite? vehSprite(Variant v, int side) => veh['${v.id}$side'];

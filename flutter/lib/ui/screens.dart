@@ -6,6 +6,8 @@ import '../app/model.dart';
 import '../game/battle.dart';
 import '../game/core.dart';
 import '../game/data.dart';
+import '../app/modsrc.dart';
+import '../game/mapdef.dart';
 import 'kit.dart';
 import 'theme.dart';
 import 'widgets.dart';
@@ -42,7 +44,7 @@ class MenuScreen extends StatelessWidget {
             TextSpan(children: [const TextSpan(text: 'РУ'), TextSpan(text: 'Б', style: TextStyle(color: C.amber)), const TextSpan(text: 'ЕЖ')]),
             style: disp(54, ls: .08).copyWith(shadows: const [Shadow(blurRadius: 24, color: Colors.black)]),
           ),
-          Text('ПЕРЕПРАВА У СЕЛА ДУБКИ', style: disp(12, color: C.txt.withValues(alpha: .75), ls: .2).copyWith(shadows: const [Shadow(blurRadius: 8, color: Colors.black)])),
+          Text(CUR_MAP.name.toUpperCase(), textAlign: TextAlign.center, style: disp(12, color: C.txt.withValues(alpha: .75), ls: .2).copyWith(shadows: const [Shadow(blurRadius: 8, color: Colors.black)])),
           const Spacer(flex: 4),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -57,6 +59,7 @@ class MenuScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(child: _SideBtn(1)),
                   ]),
+                  if (allMaps().length > 1) ...[const SizedBox(height: 10), const _MapPick()],
                   const SizedBox(height: 10),
                   Seg<String>(
                     items: [for (final e in DIFFS.entries) (e.key, e.value.name)],
@@ -94,6 +97,41 @@ class MenuScreen extends StatelessWidget {
         ]),
       ),
     );
+  }
+}
+
+class _MapPick extends StatelessWidget {
+  const _MapPick();
+  Future<void> _go(int d) async {
+    if (APP.mapLoading) return;
+    final maps = allMaps();
+    final i = maps.indexWhere((m) => m.id == APP.mapId);
+    final m = maps[((i < 0 ? 0 : i) + d) % maps.length];
+    APP.mapLoading = true;
+    APP.mapId = m.id;
+    APP.changed();
+    await prepareMap(m);
+    APP.mapLoading = false;
+    APP.changed();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final maps = allMaps();
+    final m = maps.firstWhere((x) => x.id == APP.mapId, orElse: () => maps.first);
+    return Row(children: [
+      RoundBtn(icon: Icons.chevron_left, size: 44, onTap: () => _go(maps.length - 1)),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Column(children: [
+          Text(m.name.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: disp(14)),
+          const SizedBox(height: 2),
+          Text(APP.mapLoading ? 'Загрузка карты…' : 'Карта ${maps.indexOf(m) + 1} из ${maps.length}', style: body(11.5, color: C.mut)),
+        ]),
+      ),
+      const SizedBox(width: 8),
+      RoundBtn(icon: Icons.chevron_right, size: 44, onTap: () => _go(1)),
+    ]);
   }
 }
 

@@ -6,18 +6,24 @@ import 'ai.dart';
 import 'combat.dart';
 import 'core.dart';
 import 'data.dart';
+import 'fxcfg.dart';
 import 'map.dart';
 
 const double LIMIT = 720; // секунд боя
 const double HOLD_NEED = 40; // секунд удержания обоих ключевых рубежей
 const double ATK_INC = 1.5, ATK_PTS = 1.5;
-const List<List<double>> BASE = [
+// Всё, что зависит от карты, задаётся при её загрузке (см. mapdef.dart).
+List<List<double>> BASE = [
   [2350, 740],
   [50, 740]
 ];
-const List<double> BUDGET = [1000, 1400];
+/// Точки для ИИ: сбор наступающих, позиция миномётов, узкое место и точка дыма у него.
+List<double> AI_ASM = [880, 740], AI_POST = [760, 700], AI_CHOKE = [1150, 740], AI_SMOKE = [1230, 740];
+/// Владелец рубежей в начале боя: -1 — ничей, 0 — ВСУ, 1 — ВС РФ.
+List<int> OBJ_OWNER = [-1, 0, 0];
+final List<double> BUDGET = [1000, 1400];
 const int MAX_UNITS = 26;
-const List<List<String>> PRESET = [
+final List<List<String>> PRESET = [
   ['ua_rifle', 'ua_rifle', 'ua_rifle', 'mg_pkm', 'at_javelin', 'at_nlaw', 'sniper_ua', 'mortar_82', 'bradley'],
   ['ru_rifle', 'ru_rifle', 'ru_rifle', 'ru_rifle', 'mg_pkm', 'at_kornet', 'at_rpg', 'bmp2', 'btr82', 'tank_t72b3', 'mortar_82', 'sniper_ru']
 ];
@@ -26,9 +32,9 @@ class Zone {
   const Zone(this.x0, this.x1, this.y0, this.y1);
 }
 
-const List<Zone> ZONE = [Zone(1380, 2360, 60, 1440), Zone(50, 560, 60, 1440)];
+List<Zone> ZONE = [const Zone(1380, 2360, 60, 1440), const Zone(50, 560, 60, 1440)];
 
-const Map<String, List<List<double>>> DEF_SLOTS = {
+Map<String, List<List<double>>> DEF_SLOTS = {
   'sniper': [[1815, 470], [1930, 470], [1990, 520], [1870, 530]],
   'mg': [[1512, 760], [1895, 590], [1600, 670], [1700, 640], [1830, 640]],
   'at': [[1556, 748], [1660, 742], [1620, 820], [1790, 790]],
@@ -256,7 +262,13 @@ bool hasBattle = false;
 Battle newBattle(int player, String diffKey, [List<List<String>>? forces]) {
   S = Battle(player, diffKey);
   hasBattle = true;
-  S.objs = MAP.objs.map((o) => ObjState(o, o.id == 0 ? 0 : -1, o.id == 0 ? -1 : 0)).toList();
+  S.objs = [
+    for (int i = 0; i < MAP.objs.length; i++)
+      () {
+        final ow = i < OBJ_OWNER.length ? OBJ_OWNER[i] : -1;
+        return ObjState(MAP.objs[i], ow == -1 ? 0 : (ow == 0 ? -1 : 1), ow);
+      }(),
+  ];
   deploy(forces);
   perception();
   fogUpdate();
@@ -288,6 +300,23 @@ List<String> autoForce(int side, double budget) {
     left -= pick.cost;
   }
   return out;
+}
+
+/// Направление от своей базы к базе противника (единичный вектор).
+List<double> baseDir(int side) {
+  final a = BASE[side], b = BASE[1 - side];
+  final dx = b[0] - a[0], dy = b[1] - a[1], l = math.max(1.0, math.sqrt(dx * dx + dy * dy));
+  return [dx / l, dy / l];
+}
+
+/// Точка у своей базы: d — вглубь к противнику, l — поперёк; прижата к зоне расстановки и проходимой клетке.
+List<double> basePoint(int side, double d, double l) {
+  final b = BASE[side], dir = baseDir(side);
+  final z = ZONE[side];
+  final x = clamp(b[0] + dir[0] * d - dir[1] * l, z.x0 + 10, z.x1 - 10), y = clamp(b[1] + dir[1] * d + dir[0] * l, z.y0 + 10, z.y1 - 10);
+  final c = nearestPassable(cellIdx(x, y), T_MV_V);
+  if (c == cellIdx(x, y)) return [x, y];
+  return [(c % GW + .5) * CELL, (c ~/ GW + .5) * CELL];
 }
 
 void placeForce(int side, List<String> list) {
@@ -328,22 +357,27 @@ void placeForce(int side, List<String> list) {
     } else {
       final k = used['a_$c'] ?? 0;
       used['a_$c'] = k + 1;
+      // глубина d от базы в сторону противника и смещение l поперёк (для «Переправы» совпадает с прежними координатами)
+      double d, l;
       if (c == 'tank') {
-        x = 120;
-        y = 620.0 + (k % 5) * 70;
+        d = 70;
+        l = -120.0 + (k % 5) * 70;
       } else if (c == 'ifv') {
-        x = 165;
-        y = 600.0 + (k % 6) * 56;
+        d = 115;
+        l = -140.0 + (k % 6) * 56;
       } else if (c == 'mortar') {
-        x = 80;
-        y = 700.0 + k * 40;
+        d = 30;
+        l = -40.0 + k * 40;
       } else if (c == 'sniper') {
-        x = 330;
-        y = 540.0 + k * 60;
+        d = 280;
+        l = -200.0 + k * 60;
       } else {
-        x = 215.0 + (k % 3) * 30 + ((k ~/ 3) % 2) * 14;
-        y = 600.0 + (((k ~/ 3) * 50) % 380) + (k % 3) * 8;
+        d = 165.0 + (k % 3) * 30 + ((k ~/ 3) % 2) * 14;
+        l = -140.0 + (((k ~/ 3) * 50) % 380) + (k % 3) * 8;
       }
+      final p = basePoint(side, d, l);
+      x = p[0];
+      y = p[1];
     }
     final q = mkSquad(side, vid, x, y);
     if (fort) {
@@ -392,7 +426,7 @@ void addTracer(double x0, double y0, double x1, double y1, int side) {
   t.x1 = x1;
   t.y1 = y1;
   t.t0 = S.t;
-  t.life = .1 + rnd() * .06;
+  t.life = (.1 + rnd() * .06) * FX.tracerLife;
   t.side = side;
 }
 
@@ -404,9 +438,9 @@ void boom(double x, double y, double r, [int kind = 0]) {
   e.y = y;
   e.r = r;
   e.t0 = S.t;
-  e.life = kind == 2 ? 1.6 : .7 + r / 60;
+  e.life = kind == 2 ? 1.6 * FX.big.dur : (.7 + r / 60) * (kind == 0 ? FX.boom.dur : 1);
   e.kind = kind;
-  HOOK.onSfx?.call('boom', x, y, math.min(1, r / 34));
+  HOOK.onSfx?.call('boom:$kind', x, y, math.min(1, r / 34));
 }
 
 /* ---------- приказы ---------- */
@@ -701,7 +735,10 @@ String? useDrone(int side, double x, double y) {
   final a = S.ab[side]['drone']!;
   a.ch--;
   a.cd = AB_CD['drone']!;
-  final sx = BASE[side][0], sy = clamp(y, 200, 1300);
+  // старт у своего края карты, напротив цели
+  final b = BASE[side], dir = baseDir(side), px = -dir[1], py = dir[0];
+  final off = clamp((x - b[0]) * px + (y - b[1]) * py, -560, 560);
+  final sx = clamp(b[0] + px * off, 0, W), sy = clamp(b[1] + py * off, 0, H);
   S.drones.add(Drone(side, sx, sy, x, y, 430, 26));
   return null;
 }

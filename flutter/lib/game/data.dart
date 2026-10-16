@@ -34,6 +34,13 @@ class Man {
   const Man(this.job, this.w, this.a);
 }
 
+/// Своя графика юнита (пути внутри assets/, картинки смотрят вправо).
+class UnitArt {
+  final String? hull, turret;
+  final double scale, tx, ty;
+  const UnitArt({this.hull, this.turret, this.scale = 1, this.tx = 0, this.ty = 0});
+}
+
 class Variant {
   final String id, cls, name, desc, hint;
   final int side; // -1 — обе стороны
@@ -42,6 +49,10 @@ class Variant {
   final double cost, delay, speed, vision, morale, len, wid, vuln, stealth;
   final Arm? arm;
   final List<Man> men;
+  /// Для модов: id существующего юнита, чей нарисованный кодом вид использовать; своя графика — в [art].
+  final String? look;
+  final UnitArt? art;
+  final String? armId;
   // производные
   late final int max;
   late final bool mortar;
@@ -52,7 +63,7 @@ class Variant {
   final double supp = 1, ammoUse = .3;
   late final double moveFire, fpInf, vsVeh, minRange;
   Variant(this.id, this.cls, this.side, this.name, this.desc, this.cost, this.delay, this.speed, this.vision, this.morale, this.hint, this.men,
-      {this.veh = false, this.wheeled = false, this.cap = 0, this.len = 0, this.wid = 0, this.arm, this.vuln = 0, this.stealth = 0}) {
+      {this.veh = false, this.wheeled = false, this.cap = 0, this.len = 0, this.wid = 0, this.arm, this.vuln = 0, this.stealth = 0, this.look, this.art, this.armId}) {
     max = men.length;
     mortar = cls == 'mortar';
     sides = side == -1 ? [0, 1] : [side];
@@ -73,10 +84,11 @@ class Variant {
     double atp = 0, sap = 0;
     for (final man in men) {
       for (final id in man.w) {
-        final w = WPN[id]!;
+        final w = WPN[id];
+        if (w == null) continue;
         for (final k in w.a) {
-          final a = AMMO[k]!;
-          if (!a.hasPen) continue;
+          final a = AMMO[k];
+          if (a == null || !a.hasPen) continue;
           if (a.k == 'HEAT' || a.k == 'ATGM' || (w.k == 'cannon' && a.k == 'AP')) {
             if (a.pen[0] > atp) atp = a.pen[0];
           } else if (w.k != 'cannon' && w.k != 'mortar') {
@@ -101,7 +113,7 @@ class Variant {
 }
 
 
-const Map<String, Ammo> AMMO = {
+final Map<String, Ammo> AMMO = {
   'sa545': Ammo('sa545', 'SA', '5,45×39', pen: [3.0, 2.0], supp: 0.35, kill: 0.42),
   'sa556': Ammo('sa556', 'SA', '5,56×45', pen: [3.0, 2.0], supp: 0.35, kill: 0.42),
   'sa762': Ammo('sa762', 'SA', '7,62×54R', pen: [9.0, 5.0], supp: 0.6, kill: 0.55),
@@ -131,7 +143,7 @@ const Map<String, Ammo> AMMO = {
   'fpv': Ammo('fpv', 'HEAT', 'FPV', pen: [300.0, 300.0], supp: 20.0, kill: 0.8, rad: 6.0, cal: 100.0, top: true),
 };
 
-const Map<String, Wpn> WPN = {
+final Map<String, Wpn> WPN = {
   'ak74': Wpn('ak74', 'АК-74', 'rifle', 72.0, 30.0, 3.0, 270.0, 0.3, ['sa545']),
   'ak12': Wpn('ak12', 'АК-12', 'rifle', 76.0, 30.0, 3.0, 280.0, 0.31, ['sa545']),
   'm4': Wpn('m4', 'M4A1', 'rifle', 76.0, 30.0, 2.6, 280.0, 0.32, ['sa556']),
@@ -161,7 +173,7 @@ const Map<String, Wpn> WPN = {
   'nsvt': Wpn('nsvt', 'Зенитный пулемёт', 'hmg', 220.0, 100.0, 6.0, 640.0, 0.2, ['sa127'], job: 'commander', coax: true),
 };
 
-const Map<String, Arm> ARM = {
+final Map<String, Arm> ARM = {
   't64bv': Arm([440.0, 760.0], [70.0, 120.0], [32.0, 32.0], [22.0, 22.0]),
   't72b3': Arm([520.0, 860.0], [80.0, 140.0], [35.0, 35.0], [25.0, 25.0]),
   't80bvm': Arm([620.0, 1020.0], [95.0, 170.0], [38.0, 38.0], [28.0, 28.0]),
@@ -187,19 +199,25 @@ final List<Variant> VARIANTS = [
   Variant('sniper_ua', 'sniper', 0, 'Снайперская пара', 'Barrett M82 + наблюдатель', 110.0, 9.0, 9.0, 520.0, 80.0, 'Дальний точный огонь', [Man('sniper', ['m82'], {'sa50': 40}), Man('spotter', ['m4'], {'sa556': 120})], stealth: 0.75),
   Variant('sniper_ru', 'sniper', 1, 'Снайперская пара', 'Т-5000 + наблюдатель', 100.0, 9.0, 9.0, 520.0, 80.0, 'Дальний точный огонь', [Man('sniper', ['t5000'], {'sa338': 40}), Man('spotter', ['ak12'], {'sa545': 120})], stealth: 0.75),
   Variant('mortar_82', 'mortar', -1, 'Миномётный расчёт', '3 бойца: миномёт 82 мм', 130.0, 10.0, 8.0, 280.0, 62.0, 'Огонь по площадям', [Man('gunner', ['mortar82'], {'he82': 42, 'smk82': 6}), Man('loader', ['ak74'], {'sa545': 120}), Man('rifle', ['ak74'], {'sa545': 120})]),
-  Variant('bmp2', 'ifv', -1, 'БМП-2', '30 мм, «Конкурс», экипаж 3, десант 7', 190.0, 12.0, 26.0, 430.0, 85.0, 'Скорость и скорострельность', [Man('driver', [], {}), Man('gunner', ['a2a42', 'pkt', 'konkurs'], {'ap30': 160, 'he30': 340, 'sa762': 2000, 'konkurs': 4}), Man('commander', [], {})], veh: true, cap: 7, len: 24.0, wid: 11.0, vuln: 0.2, arm: ARM['bmp2']),
-  Variant('bmp3', 'ifv', 1, 'БМП-3', '100 + 30 мм, экипаж 3, десант 7', 270.0, 13.0, 26.0, 430.0, 85.0, 'Две пушки, фугасное действие', [Man('driver', [], {}), Man('gunner', ['a2a70', 'a2a72', 'pkt'], {'he100': 40, 'ap30': 100, 'he30': 400, 'sa762': 2000}), Man('commander', [], {})], veh: true, cap: 7, len: 26.0, wid: 11.0, vuln: 0.3, arm: ARM['bmp3']),
-  Variant('btr82', 'ifv', 1, 'БТР-82А', '30 мм, колёсный, десант 7', 140.0, 11.0, 32.0, 420.0, 80.0, 'Быстрый и лёгкий', [Man('driver', [], {}), Man('gunner', ['a2a72', 'pkt'], {'ap30': 100, 'he30': 300, 'sa762': 2000}), Man('commander', [], {})], veh: true, wheeled: true, cap: 7, len: 24.0, wid: 10.0, vuln: 0.15, arm: ARM['btr82']),
-  Variant('bradley', 'ifv', 0, 'M2A2 Bradley', '25 мм, TOW, экипаж 3, десант 6', 240.0, 13.0, 24.0, 440.0, 85.0, 'Автопушка и ПТУР', [Man('driver', [], {}), Man('gunner', ['m242', 'm240', 'tow'], {'ap25': 150, 'he25': 450, 'sa762': 2200, 'tow': 3}), Man('commander', [], {})], veh: true, cap: 6, len: 25.0, wid: 12.0, vuln: 0.2, arm: ARM['bradley']),
-  Variant('tank_t64bv', 'tank', 0, 'Т-64БВ', '125 мм, экипаж 3', 250.0, 14.0, 22.0, 440.0, 86.0, 'Старый, но грозный', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 12, 'heat125': 6, 'he125': 10, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 30.0, wid: 14.0, vuln: 0.42, arm: ARM['t64bv']),
-  Variant('tank_t72b3', 'tank', 1, 'Т-72Б3', '125 мм, экипаж 3', 290.0, 14.0, 22.0, 440.0, 88.0, 'Массовый танк', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 12, 'heat125': 8, 'he125': 14, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 30.0, wid: 14.0, vuln: 0.42, arm: ARM['t72b3']),
-  Variant('tank_t80bvm', 'tank', 1, 'Т-80БВМ', '125 мм, экипаж 3', 330.0, 14.0, 25.0, 450.0, 88.0, 'Быстрый, хорошая броня', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 14, 'heat125': 8, 'he125': 12, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 30.0, wid: 14.0, vuln: 0.4, arm: ARM['t80bvm']),
-  Variant('tank_t90m', 'tank', 1, 'Т-90М', '125 мм, экипаж 3', 370.0, 15.0, 22.0, 460.0, 90.0, 'Лучшая броня РФ', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 14, 'heat125': 8, 'he125': 14, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 31.0, wid: 14.0, vuln: 0.3, arm: ARM['t90m']),
-  Variant('tank_leo2', 'tank', 0, 'Leopard 2A6', '120 мм, экипаж 4', 380.0, 15.0, 22.0, 470.0, 90.0, 'Изолированный боекомплект', [Man('driver', [], {}), Man('gunner', ['l55', 'm240'], {'apfsds120': 22, 'heat120': 20, 'sa762': 4750}), Man('commander', ['nsvt'], {'sa127': 300}), Man('loader', [], {})], veh: true, len: 31.0, wid: 14.0, vuln: 0.08, arm: ARM['leo2']),
-  Variant('tank_abrams', 'tank', 0, 'M1A1 Abrams', '120 мм, экипаж 4', 400.0, 15.0, 23.0, 470.0, 90.0, 'Выбивные панели боекомплекта', [Man('driver', [], {}), Man('gunner', ['m256', 'm240'], {'apfsds120': 22, 'heat120': 18, 'sa762': 11400}), Man('commander', ['m2'], {'sa50': 900}), Man('loader', [], {})], veh: true, len: 31.0, wid: 14.0, vuln: 0.07, arm: ARM['abrams']),
+  Variant('bmp2', 'ifv', -1, 'БМП-2', '30 мм, «Конкурс», экипаж 3, десант 7', 190.0, 12.0, 26.0, 430.0, 85.0, 'Скорость и скорострельность', [Man('driver', [], {}), Man('gunner', ['a2a42', 'pkt', 'konkurs'], {'ap30': 160, 'he30': 340, 'sa762': 2000, 'konkurs': 4}), Man('commander', [], {})], veh: true, cap: 7, len: 24.0, wid: 11.0, vuln: 0.2, arm: ARM['bmp2'], armId: 'bmp2'),
+  Variant('bmp3', 'ifv', 1, 'БМП-3', '100 + 30 мм, экипаж 3, десант 7', 270.0, 13.0, 26.0, 430.0, 85.0, 'Две пушки, фугасное действие', [Man('driver', [], {}), Man('gunner', ['a2a70', 'a2a72', 'pkt'], {'he100': 40, 'ap30': 100, 'he30': 400, 'sa762': 2000}), Man('commander', [], {})], veh: true, cap: 7, len: 26.0, wid: 11.0, vuln: 0.3, arm: ARM['bmp3'], armId: 'bmp3'),
+  Variant('btr82', 'ifv', 1, 'БТР-82А', '30 мм, колёсный, десант 7', 140.0, 11.0, 32.0, 420.0, 80.0, 'Быстрый и лёгкий', [Man('driver', [], {}), Man('gunner', ['a2a72', 'pkt'], {'ap30': 100, 'he30': 300, 'sa762': 2000}), Man('commander', [], {})], veh: true, wheeled: true, cap: 7, len: 24.0, wid: 10.0, vuln: 0.15, arm: ARM['btr82'], armId: 'btr82'),
+  Variant('bradley', 'ifv', 0, 'M2A2 Bradley', '25 мм, TOW, экипаж 3, десант 6', 240.0, 13.0, 24.0, 440.0, 85.0, 'Автопушка и ПТУР', [Man('driver', [], {}), Man('gunner', ['m242', 'm240', 'tow'], {'ap25': 150, 'he25': 450, 'sa762': 2200, 'tow': 3}), Man('commander', [], {})], veh: true, cap: 6, len: 25.0, wid: 12.0, vuln: 0.2, arm: ARM['bradley'], armId: 'bradley'),
+  Variant('tank_t64bv', 'tank', 0, 'Т-64БВ', '125 мм, экипаж 3', 250.0, 14.0, 22.0, 440.0, 86.0, 'Старый, но грозный', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 12, 'heat125': 6, 'he125': 10, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 30.0, wid: 14.0, vuln: 0.42, arm: ARM['t64bv'], armId: 't64bv'),
+  Variant('tank_t72b3', 'tank', 1, 'Т-72Б3', '125 мм, экипаж 3', 290.0, 14.0, 22.0, 440.0, 88.0, 'Массовый танк', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 12, 'heat125': 8, 'he125': 14, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 30.0, wid: 14.0, vuln: 0.42, arm: ARM['t72b3'], armId: 't72b3'),
+  Variant('tank_t80bvm', 'tank', 1, 'Т-80БВМ', '125 мм, экипаж 3', 330.0, 14.0, 25.0, 450.0, 88.0, 'Быстрый, хорошая броня', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 14, 'heat125': 8, 'he125': 12, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 30.0, wid: 14.0, vuln: 0.4, arm: ARM['t80bvm'], armId: 't80bvm'),
+  Variant('tank_t90m', 'tank', 1, 'Т-90М', '125 мм, экипаж 3', 370.0, 15.0, 22.0, 460.0, 90.0, 'Лучшая броня РФ', [Man('driver', [], {}), Man('gunner', ['d81', 'pkt'], {'apfsds125': 14, 'heat125': 8, 'he125': 14, 'sa762': 1250}), Man('commander', ['nsvt'], {'sa127': 300})], veh: true, len: 31.0, wid: 14.0, vuln: 0.3, arm: ARM['t90m'], armId: 't90m'),
+  Variant('tank_leo2', 'tank', 0, 'Leopard 2A6', '120 мм, экипаж 4', 380.0, 15.0, 22.0, 470.0, 90.0, 'Изолированный боекомплект', [Man('driver', [], {}), Man('gunner', ['l55', 'm240'], {'apfsds120': 22, 'heat120': 20, 'sa762': 4750}), Man('commander', ['nsvt'], {'sa127': 300}), Man('loader', [], {})], veh: true, len: 31.0, wid: 14.0, vuln: 0.08, arm: ARM['leo2'], armId: 'leo2'),
+  Variant('tank_abrams', 'tank', 0, 'M1A1 Abrams', '120 мм, экипаж 4', 400.0, 15.0, 23.0, 470.0, 90.0, 'Выбивные панели боекомплекта', [Man('driver', [], {}), Man('gunner', ['m256', 'm240'], {'apfsds120': 22, 'heat120': 18, 'sa762': 11400}), Man('commander', ['m2'], {'sa50': 900}), Man('loader', [], {})], veh: true, len: 31.0, wid: 14.0, vuln: 0.07, arm: ARM['abrams'], armId: 'abrams'),
 ];
 
 final Map<String, Variant> VARS = {for (final v in VARIANTS) v.id: v};
+
+void rebuildVars() {
+  VARS
+    ..clear()
+    ..addAll({for (final v in VARIANTS) v.id: v});
+}
 
 const List<String> TYPE_ORDER = ['rifle', 'mg', 'at', 'sniper', 'mortar', 'ifv', 'tank'];
 bool isVehCls(String c) => c == 'ifv' || c == 'tank';

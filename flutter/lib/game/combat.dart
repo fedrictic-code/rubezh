@@ -471,7 +471,7 @@ void fireWeapon(Squad sq, CrewM man, WI wi, String ak, Squad tg, double d, doubl
     wi.next = now + interval;
     S.pend.add(Pending('shot', now + fl, ak, from: sq.id, to: tg.id, hit: rnd() < base, ax: sx, ay: sy, x1: tg.x, y1: tg.y, t0: now, d: d));
     sq.ammo = ammoPct(sq);
-    HOOK.onSfx?.call('shot', sx, sy, 1.25);
+    HOOK.onSfx?.call('shot:${w.k}', sx, sy, 1.25);
     if (w.k != 'ugl') boom(sx + math.cos(sq.fa) * 10, sy + math.sin(sq.fa) * 10, 6, 1);
     return;
   }
@@ -509,7 +509,7 @@ void fireWeapon(Squad sq, CrewM man, WI wi, String ak, Squad tg, double d, doubl
     sq.fxT = rand(.12, .3);
     final sp = d * .04;
     addTracer(sx, sy, tg.x + rand(-sp, sp), tg.y + rand(-sp, sp), sq.side);
-    HOOK.onSfx?.call('shot', sx, sy, w.k == 'rifle' ? .55 : 1);
+    HOOK.onSfx?.call('shot:${w.k}', sx, sy, w.k == 'rifle' ? .55 : 1);
   }
   if (!(now - sq.lastAmmoCalc < 1)) {
     sq.lastAmmoCalc = now;
@@ -604,7 +604,7 @@ void mortarStep(Squad sq, double dt) {
   wi.am['he82'] = he - 3;
   sq.ammo = ammoPct(sq);
   sq.lastFire = S.t;
-  HOOK.onSfx?.call('shot', sq.x, sq.y, 1.5);
+  HOOK.onSfx?.call('shot:mortar', sq.x, sq.y, 1.5);
   boom(sq.x, sq.y, 8, 1);
   if (--o.salvos <= 0) sq.order = null;
 }
@@ -707,6 +707,6 @@ String? useArty(int side, double x, double y) {
     S.pend.add(Pending('shell', S.t + 9 + i * .55, 'he152', x1: x + math.cos(ang) * r, y1: y + math.sin(ang) * r));
   }
   ev('Артиллерия: огонь на поражение, подлётное время 9 с', 'info', x, y, side);
-  HOOK.onSfx?.call('shot', BASE[side][0], BASE[side][1], 1);
+  HOOK.onSfx?.call('arty', BASE[side][0], BASE[side][1], 1);
   return null;
 }

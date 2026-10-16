@@ -6,13 +6,18 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 
 import '../game/core.dart';
+import '../game/fxcfg.dart';
 import '../gfx/render.dart';
 import 'model.dart';
 
 class Fx {
-  static const Map<String, int> _voices = {
-    'shot1': 3, 'shot2': 3, 'shot3': 3, 'cannon': 2, 'boom1': 2, 'boom2': 2, //
-    'tap': 2, 'select': 1, 'order': 1, 'deny': 1, 'ready': 1, 'radio': 1, 'capture': 1, 'win': 1, 'lose': 1,
+  static const Map<String, String> _ui = {
+    'tap': 'sfx/tap.wav', 'select': 'sfx/select.wav', 'order': 'sfx/order.wav', 'deny': 'sfx/deny.wav', 'ready': 'sfx/ready.wav', //
+    'radio': 'sfx/radio.wav', 'capture': 'sfx/capture.wav', 'win': 'sfx/win.wav', 'lose': 'sfx/lose.wav',
+  };
+  static const Map<String, double> _vol = {
+    'shot_rifle': .45, 'shot_mg': .5, 'shot_hmg': .6, 'shot_sniper': .6, 'shot_ugl': .5, 'shot_acan': .6, 'shot_cannon': .75, //
+    'shot_rocket': .7, 'shot_atgm': .7, 'shot_mortar': .7, 'arty': .7, 'boom': .9, 'boom_small': .45, 'boom_big': 1,
   };
   static final Map<String, List<AudioPlayer>> _pool = {};
   static final Map<String, int> _rr = {};
@@ -23,21 +28,33 @@ class Fx {
     try {
       await AudioPlayer.global.setAudioContext(AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers).build());
     } catch (_) {}
-    _voices.forEach((k, n) {
-      _pool[k] = [for (int i = 0; i < n; i++) AudioPlayer()];
-    });
     _ready = true;
   }
 
-  static void play(String name, [double vol = 1]) {
+  /// Проиграть файл (путь внутри assets/). Плееры создаются по мере надобности, до 3 на файл.
+  static void playPath(String path, double vol) {
     if (!_ready || !APP.sound || vol < .02) return;
-    final l = _pool[name];
-    if (l == null || l.isEmpty) return;
-    final i = (_rr[name] ?? 0) % l.length;
-    _rr[name] = i + 1;
+    final l = _pool.putIfAbsent(path, () => []);
+    final i = _rr[path] ?? 0;
+    _rr[path] = i + 1;
+    if (l.length < 3) l.add(AudioPlayer());
+    final p = l[i % l.length];
     try {
-      l[i].play(AssetSource('sfx/$name.wav'), volume: math.min(1.0, vol), mode: PlayerMode.lowLatency).catchError((_) {});
+      p.play(AssetSource(path), volume: math.min(1.0, vol), mode: PlayerMode.lowLatency).catchError((_) {});
     } catch (_) {}
+  }
+
+  /// Звук интерфейса по имени (tap, select, order…).
+  static void play(String name, [double vol = 1]) {
+    final path = _ui[name];
+    if (path != null) playPath(path, vol);
+  }
+
+  /// Звук из ячейки мода (shot_mg, boom_big…): случайный файл из списка.
+  static void slot(String slot, double vol) {
+    final l = SOUNDS[slot];
+    if (l == null || l.isEmpty) return;
+    playPath(l[(rnd() * l.length).floor() % l.length], vol * (_vol[slot] ?? .6));
   }
 
   /// Звук боя: громкость падает с расстоянием от центра экрана и при отдалении камеры.
@@ -53,17 +70,19 @@ class Fx {
     final reach = 1100 / math.max(.6, cam.z * 1.3);
     final g = vol * math.max(0, 1 - d / reach);
     if (g < .04) return;
-    if (kind == 'boom') {
-      play(rnd() < .5 ? 'boom1' : 'boom2', g * .9);
-      if (g > .55 && now - _lastHeavy > 900) {
+    String s;
+    if (kind.startsWith('boom:')) {
+      s = switch (kind) { 'boom:1' => 'boom_small', 'boom:2' => 'boom_big', _ => 'boom' };
+      if (kind != 'boom:1' && g > .55 && now - _lastHeavy > 900) {
         _lastHeavy = now;
         haptic(2);
       }
-    } else if (vol > 1.2) {
-      play('cannon', g * .7);
+    } else if (kind.startsWith('shot:')) {
+      s = 'shot_${kind.substring(5)}';
     } else {
-      play('shot${1 + (rnd() * 3).floor()}', g * .45);
+      s = kind;
     }
+    slot(s, g);
   }
 
   /// 0 — щелчок выбора, 1 — лёгкий удар, 2 — средний.

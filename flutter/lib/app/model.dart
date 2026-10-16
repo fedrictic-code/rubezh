@@ -18,6 +18,8 @@ class AppModel extends ChangeNotifier {
   bool sound = true, haptics = true, showPerf = false, settingsOpen = false;
   bool tutorial = true; // обучение в следующем бою
   bool lite = false; // экономия батареи: 30 кадров/с и упрощённая графика
+  String mapId = 'crossing';
+  bool mapLoading = false;
   SharedPreferences? _prefs;
 
   Future<void> load() async {
@@ -31,6 +33,7 @@ class AppModel extends ChangeNotifier {
       UI.lite = lite;
       side = p.getInt('side') ?? 0;
       diff = p.getString('diff') ?? 'normal';
+      mapId = p.getString('map') ?? 'crossing';
     } catch (_) {}
   }
 
@@ -43,6 +46,7 @@ class AppModel extends ChangeNotifier {
     p.setBool('lite', lite);
     p.setInt('side', side);
     p.setString('diff', diff);
+    p.setString('map', mapId);
   }
 
   Over? endInfo;

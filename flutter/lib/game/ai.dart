@@ -32,13 +32,13 @@ void aiThink(int s) {
         break;
       }
     }
-    goal ??= S.objs[1];
+    goal ??= S.objs[math.min(1, S.objs.length - 1)];
   }
   final inf = mine.where((q) => !q.t.veh && q.role == 'assault' && q.wave != 'gather').toList();
   final xs = inf.map((q) => q.x).toList()..sort();
   final double? infX = xs.isNotEmpty ? xs[(xs.length * .7).floor()] : null;
   // волны подкрепления: сбор у рубежа развёртывания, затем общий бросок
-  const asmX = 880.0, asmY = 740.0;
+  final asmX = AI_ASM[0], asmY = AI_ASM[1];
   final gath = mine.where((q) => q.wave == 'gather').toList();
   if (atk) {
     for (final q in mine) {
@@ -100,7 +100,7 @@ void aiThink(int s) {
     }
     if (q.t.mortar) {
       if (atk && q.post == null && S.t > 15) {
-        q.post = Pt(760, 700 + rand(-40, 40));
+        q.post = Pt(AI_POST[0], AI_POST[1] + rand(-40, 40));
         issue([q], 'move', q.post!.x, q.post!.y);
       }
       aiMortar(q, s);
@@ -233,7 +233,7 @@ void aiAbilities(int s, bool atk, List<Squad> mine) {
     } else {
       ObjState o;
       if (atk) {
-        o = S.objs.firstWhere((x) => x.owner != s, orElse: () => S.objs[1]);
+        o = S.objs.firstWhere((x) => x.owner != s, orElse: () => S.objs[math.min(1, S.objs.length - 1)]);
       } else {
         o = S.objs[0];
       }
@@ -274,7 +274,7 @@ void aiAbilities(int s, bool atk, List<Squad> mine) {
     if (best != null && bs >= 2.5) useArty(s, best.x, best.y);
   }
   if (atk && canUse(s, 'smoke') && rnd() < .12) {
-    final near = mine.any((q) => !q.t.veh && dist(q.x, q.y, 1150, 740) < 220);
-    if (near && S.squads.any((e) => !e.dead && e.side != s && isSpotted(e, s))) useSmoke(s, 1230, 740);
+    final near = mine.any((q) => !q.t.veh && dist(q.x, q.y, AI_CHOKE[0], AI_CHOKE[1]) < 220);
+    if (near && S.squads.any((e) => !e.dead && e.side != s && isSpotted(e, s))) useSmoke(s, AI_SMOKE[0], AI_SMOKE[1]);
   }
 }
