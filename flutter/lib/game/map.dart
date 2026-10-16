@@ -88,7 +88,7 @@ void stampLine(Poly P, double width, void Function(int c, int x, int y) fn) {
   }
 }
 
-Poly _poly(List<List<num>> p) => p.map((e) => [e[0].toDouble(), e[1].toDouble()]).toList();
+Poly _poly(List<List<num>> p) => p.map((e) => e.map((v) => v.toDouble()).toList()).toList();
 
 void genMap() {
   final r = mulberry32(20241016);
