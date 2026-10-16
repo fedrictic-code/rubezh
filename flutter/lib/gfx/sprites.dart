@@ -632,7 +632,7 @@ class SpriteCache {
           continue;
         }
         // нарисованный кодом вид: свой или взятый у другого юнита («look»)
-        final src = (v.look != null ? looks?[v.look] : null) ?? v;
+        final Variant src = (v.look != null && looks != null ? looks[v.look!] : null) ?? v;
         final hull = await spHull(src, side), tu = await spTurret(src, side);
         veh[key] = VehSprite(hull, tu, src.len + 3, src.wid + 3, src.len * (_tx[src.id] ?? .05), src.wid * (_ty[src.id] ?? 0));
       }
