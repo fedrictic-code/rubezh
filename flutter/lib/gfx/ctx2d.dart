@@ -4,9 +4,9 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import '../game/core.dart' show TAU;
 import 'package:flutter/painting.dart' show TextPainter, TextSpan, TextStyle, TextDirection, FontWeight;
 
-const double TAU = math.pi * 2;
 
 final Map<String, ui.Color> _cssCache = {};
 
@@ -236,8 +236,7 @@ class Ctx2D {
     var tp = _tp[key];
     if (tp == null) {
       if (_tp.length > 600) _tp.clear();
-      final base = TextStyle(fontSize: size, fontWeight: bold ? FontWeight.w700 : FontWeight.w500, height: 1.0, fontFamily: 'sans-serif');
-      final spans = <TextSpan>[];
+      final base = TextStyle(fontSize: size, fontWeight: bold ? FontWeight.w700 : FontWeight.w500, height: 1.0);
       tp = TextPainter(textDirection: TextDirection.ltr, text: TextSpan(text: s, style: base.copyWith(color: color)))..layout();
       if (outline != null) {
         final o = TextPainter(
@@ -253,7 +252,6 @@ class Ctx2D {
           ..layout();
         _tpOut[key] = o;
       }
-      spans.clear();
       _tp[key] = tp;
     }
     final w = tp.width, h = tp.height;

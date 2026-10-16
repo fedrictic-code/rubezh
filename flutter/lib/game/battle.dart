@@ -61,6 +61,7 @@ class WI {
 }
 
 class CrewM {
+  String? kind; // кеш типа спрайта бойца
   final String job;
   final List<WI> ws;
   bool ok = true;

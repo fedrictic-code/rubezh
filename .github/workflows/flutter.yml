@@ -34,12 +34,18 @@ jobs:
         id: test
         continue-on-error: true
         run: flutter test --reporter expanded > ci_out/test.txt 2>&1
+      - name: Ранняя диагностика (анализ и тесты)
+        if: always()
+        continue-on-error: true
+        run: bash ci/publish.sh "stage=early analyze=${{ steps.analyze.outcome }} test=${{ steps.test.outcome }}" "${{ github.sha }}" "${{ github.repository }}" "${{ secrets.GITHUB_TOKEN }}"
       - name: APK
         id: apk
+        if: ${{ !contains(github.event.head_commit.message, '[quick]') }}
         continue-on-error: true
         run: flutter build apk --release > ci_out/apk.txt 2>&1
       - name: Web
         id: web
+        if: ${{ !contains(github.event.head_commit.message, '[quick]') }}
         continue-on-error: true
         run: flutter build web --release > ci_out/web.txt 2>&1
       - name: Скриншоты
@@ -52,11 +58,7 @@ jobs:
           python ci/shot.py ci_out http://localhost:8099 $(cat ci/screens.txt) > ci_out/shot.txt 2>&1
       - name: Диагностика в ветку ci-out
         if: always()
-        run: |
-          for f in analyze test apk web; do tail -n 400 ci_out/$f.txt > ci_out/$f.tail.txt 2>/dev/null || true; done
-          echo "analyze=${{ steps.analyze.outcome }} test=${{ steps.test.outcome }} apk=${{ steps.apk.outcome }} web=${{ steps.web.outcome }} sha=${{ github.sha }}" > ci_out/STATUS.txt
-          rm -rf /tmp/ciout && mkdir /tmp/ciout && cp -r ci_out/. /tmp/ciout/
-          cd /tmp/ciout && git init -q -b ci-out && git config user.name ci && git config user.email ci@users.noreply.github.com && git add -A && git commit -qm "ci ${{ github.sha }}" && git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" ci-out
+        run: bash ci/publish.sh "analyze=${{ steps.analyze.outcome }} test=${{ steps.test.outcome }} apk=${{ steps.apk.outcome }} web=${{ steps.web.outcome }}" "${{ github.sha }}" "${{ github.repository }}" "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/upload-artifact@v4
         if: steps.apk.outcome == 'success'
         with:
@@ -64,5 +66,11 @@ jobs:
           path: flutter/build/app/outputs/flutter-apk/app-release.apk
       - name: Итог
         if: always()
+        env:
+          MSG: ${{ github.event.head_commit.message }}
         run: |
-          [ "${{ steps.test.outcome }}" = success ] && [ "${{ steps.apk.outcome }}" = success ] || { echo "::error title=Flutter::test=${{ steps.test.outcome }} apk=${{ steps.apk.outcome }} (подробности в ветке ci-out)"; exit 1; }
+          if echo "$MSG" | grep -q '\[quick\]'; then
+            [ "${{ steps.test.outcome }}" = success ] || { echo "::error title=Flutter::test=${{ steps.test.outcome }} (см. ветку ci-out)"; exit 1; }
+          else
+            [ "${{ steps.test.outcome }}" = success ] && [ "${{ steps.apk.outcome }}" = success ] || { echo "::error title=Flutter::test=${{ steps.test.outcome }} apk=${{ steps.apk.outcome }} (см. ветку ci-out)"; exit 1; }
+          fi
