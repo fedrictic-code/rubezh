@@ -24,7 +24,7 @@ class Loop {
   final Perf perf = Perf();
   Ticker? _ticker;
   int _lastUs = -1;
-  int _lastHud = 0, _lastInput = 0;
+  int _lastHud = 0, _lastInput = 0, _lastIdle = 0;
 
   void start(TickerProvider vsync) {
     _ticker ??= vsync.createTicker(_onTick)..start();
@@ -66,8 +66,14 @@ class Loop {
       moved = true; // идёт бой: эффекты и движение
     }
     final now = nowMs();
-    // на паузе, при расстановке и после конца боя без касаний карту не перерисовываем
-    if (moved || TUT.active || now - _lastInput < 1500) frame.fire();
+    // на паузе, при расстановке и после конца боя без касаний карта рисуется реже (10 кадров/с), но не замирает
+    final idle = !(moved || TUT.active || now - _lastInput < 2500);
+    if (!idle) {
+      frame.fire();
+    } else if (now - _lastIdle >= 100) {
+      _lastIdle = now;
+      frame.fire();
+    }
     if (now - _lastHud > 100) {
       _lastHud = now;
       CTL.watch();

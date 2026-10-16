@@ -65,6 +65,8 @@ class Assets {
   static final List<List<double>> craters = [];
   /// Картинки эффектов из мода (путь → изображение).
   static final Map<String, ui.Image> fxImg = {};
+  /// Вызывается, когда готова новая картинка (туман) — чтобы карта перерисовалась.
+  static void Function()? onReady;
   static const int fogK = 2; // во сколько раз сглаженный туман подробнее сетки (дальше сглаживает видеокарта)
   static Uint8List? _fogPrev;
 
@@ -129,6 +131,7 @@ class Assets {
       fog = im;
       old?.dispose();
       fogBusy = false;
+      onReady?.call();
     });
   }
 }

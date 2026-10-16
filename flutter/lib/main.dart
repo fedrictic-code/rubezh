@@ -7,6 +7,7 @@ import 'app/loop.dart';
 import 'app/model.dart';
 import 'app/modsrc.dart';
 import 'game/battle.dart';
+import 'gfx/render.dart';
 import 'ui/battlefield.dart';
 import 'ui/hud.dart';
 import 'ui/screens.dart';
@@ -59,6 +60,7 @@ class _RootState extends State<Root> with SingleTickerProviderStateMixin {
     final maps = allMaps();
     await prepareMap(maps.firstWhere((m) => m.id == APP.mapId, orElse: () => maps.first));
     if (!mounted) return;
+    Assets.onReady = LOOP.poke;
     LOOP.start(this);
     APP.go(Screen.menu);
     _debugScreen();

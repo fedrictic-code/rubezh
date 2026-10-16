@@ -206,6 +206,7 @@ class _HoldBar extends StatelessWidget {
 class _Mini extends StatelessWidget {
   const _Mini();
   void _go(Offset p, Size s) {
+    LOOP.poke();
     cam.x = p.dx / s.width * W;
     cam.y = p.dy / s.height * H;
     clampCam();

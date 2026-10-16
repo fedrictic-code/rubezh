@@ -97,7 +97,7 @@ class _BfState extends State<Battlefield> {
   }
 
   void _hover(PointerHoverEvent e) {
-    if (UI.mode != null) LOOP.poke();
+    LOOP.poke();
     final w = s2w(e.localPosition.dx, e.localPosition.dy);
     UI.ptr = Pt(w.x, w.y);
     if (hasBattle && !UI.menu && e.kind == PointerDeviceKind.mouse) {
