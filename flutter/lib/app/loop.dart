@@ -8,6 +8,7 @@ import '../game/battle.dart';
 import '../game/core.dart';
 import '../gfx/render.dart';
 import 'controller.dart';
+import 'tutorial.dart';
 
 class Tick extends ChangeNotifier {
   void fire() => notifyListeners();
@@ -56,6 +57,8 @@ class Loop {
     final now = nowMs();
     if (now - _lastHud > 100) {
       _lastHud = now;
+      CTL.watch();
+      TUT.tick();
       hud.fire();
     }
   }

@@ -31,8 +31,9 @@ TextStyle mono(double size, {Color color = C.txt, FontWeight w = FontWeight.w600
 TextStyle body(double size, {Color color = C.txt, FontWeight w = FontWeight.w500, double h = 1.25}) =>
     TextStyle(fontSize: size, fontWeight: w, color: color, height: h);
 
-TextStyle disp(double size, {Color color = C.txt, double ls = .06}) =>
-    TextStyle(fontSize: size, fontWeight: FontWeight.w700, color: color, letterSpacing: size * ls, height: 1.15);
+/// Заголовки — шрифт Russo One (assets/fonts), есть кириллица.
+TextStyle disp(double size, {Color color = C.txt, double ls = .04}) =>
+    TextStyle(fontFamily: 'Russo', fontSize: size, fontWeight: FontWeight.w400, color: color, letterSpacing: size * ls, height: 1.15);
 
 Widget tap(VoidCallback? onTap, Widget child, {HitTestBehavior? behavior}) =>
     GestureDetector(behavior: behavior ?? HitTestBehavior.opaque, onTap: onTap, child: child);

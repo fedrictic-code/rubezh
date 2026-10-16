@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audioplayers: ^6.1.0
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +19,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/sfx/
+  fonts:
+    - family: Russo
+      fonts:
+        - asset: assets/fonts/RussoOne-Regular.ttf

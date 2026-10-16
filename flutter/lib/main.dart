@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app/controller.dart';
+import 'app/fx.dart';
 import 'app/loop.dart';
 import 'app/model.dart';
 import 'game/battle.dart';
@@ -53,6 +54,8 @@ class _RootState extends State<Root> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _init() async {
+    await APP.load();
+    await Fx.init();
     wireHooks();
     genMap();
     await Assets.loadTerrain();
@@ -73,6 +76,7 @@ class _RootState extends State<Root> with SingleTickerProviderStateMixin {
       return;
     }
     APP.force[APP.side] = APP.presetCounts(APP.side);
+    APP.tutorial = s == 'game' || s == 'play';
     if (s == 'force') {
       APP.go(Screen.force);
       return;
@@ -84,7 +88,11 @@ class _RootState extends State<Root> with SingleTickerProviderStateMixin {
     for (int i = 0; i < 20 * 75 && S.over == null; i++) {
       step();
     }
-    CTL.selectAll();
+    if (s == 'sel') {
+      CTL.sqTap(1);
+    } else {
+      CTL.selectAll();
+    }
     if (s == 'deck') CTL.deckOpen = true;
     if (s == 'end') {
       S.over = Over(S.player, 'Оба рубежа удержаны ${HOLD_NEED.toInt()} секунд');

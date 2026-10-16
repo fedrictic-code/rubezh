@@ -6,6 +6,7 @@ import '../app/model.dart';
 import '../game/battle.dart';
 import '../game/core.dart';
 import '../game/data.dart';
+import 'kit.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -26,42 +27,6 @@ class _Card extends StatelessWidget {
       );
 }
 
-Widget _h2(String t) => Padding(padding: const EdgeInsets.only(top: 16, bottom: 8), child: Text(t.toUpperCase(), style: disp(11, color: C.mut, ls: .14)));
-
-class BigBtn extends StatelessWidget {
-  final String t;
-  final VoidCallback? onTap;
-  const BigBtn(this.t, this.onTap, {super.key});
-  @override
-  Widget build(BuildContext context) => Opacity(
-        opacity: onTap == null ? .4 : 1,
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 52,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: C.amber, borderRadius: BorderRadius.circular(12)),
-            child: Text(t.toUpperCase(), style: disp(16, color: const Color(0xFF1A1405), ls: .12)),
-          ),
-        ),
-      );
-}
-
-class GhostBtn extends StatelessWidget {
-  final String t;
-  final VoidCallback? onTap;
-  const GhostBtn(this.t, this.onTap, {super.key});
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 42,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(color: const Color(0x0DFFFFFF), borderRadius: BorderRadius.circular(10), border: Border.all(color: C.line)),
-          child: Text(t, textAlign: TextAlign.center, style: body(13)),
-        ),
-      );
-}
 
 /* ---------- меню ---------- */
 class MenuScreen extends StatelessWidget {
@@ -70,91 +35,63 @@ class MenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: APP,
-      builder: (context, _) => _Card(
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      builder: (context, _) => SafeArea(
+        child: Column(children: [
+          const Spacer(flex: 3),
           Text.rich(
             TextSpan(children: [const TextSpan(text: 'РУ'), TextSpan(text: 'Б', style: TextStyle(color: C.amber)), const TextSpan(text: 'ЕЖ')]),
-            style: disp(40, ls: .1),
-            textAlign: TextAlign.center,
+            style: disp(54, ls: .08).copyWith(shadows: const [Shadow(blurRadius: 24, color: Colors.black)]),
           ),
-          const SizedBox(height: 4),
-          Text('Тактика в реальном времени · Flutter 0.2', textAlign: TextAlign.center, style: body(12, color: C.mut)),
-          const SizedBox(height: 14),
-          Text.rich(
-            const TextSpan(children: [
-              TextSpan(text: 'Переправа у села Дубки. ', style: TextStyle(fontWeight: FontWeight.w700)),
-              TextSpan(text: 'Река делит поле боя. Наступающие должны взять и удержать 40 секунд село Дубки и высоту 112. Обороняющимся нужно продержаться 12 минут. Очки подкрепления приносят захваченные рубежи.'),
-            ]),
-            style: body(13, h: 1.45),
-          ),
-          _h2('Сторона'),
-          Row(children: [
-            Expanded(child: _SideBtn(0)),
-            const SizedBox(width: 8),
-            Expanded(child: _SideBtn(1)),
-          ]),
-          _h2('Сложность'),
-          Row(children: [
-            for (final e in DIFFS.entries)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: PillBtn(
-                    h: 38,
-                    r: 10,
-                    on: APP.diff == e.key,
-                    onTap: () {
-                      APP.diff = e.key;
+          Text('ПЕРЕПРАВА У СЕЛА ДУБКИ', style: disp(12, color: C.txt.withValues(alpha: .75), ls: .2).copyWith(shadows: const [Shadow(blurRadius: 8, color: Colors.black)])),
+          const Spacer(flex: 4),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: const Color(0xE60E1317), borderRadius: BorderRadius.circular(20), border: Border.all(color: C.line)),
+                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Row(children: [
+                    Expanded(child: _SideBtn(0)),
+                    const SizedBox(width: 10),
+                    Expanded(child: _SideBtn(1)),
+                  ]),
+                  const SizedBox(height: 10),
+                  Seg<String>(
+                    items: [for (final e in DIFFS.entries) (e.key, e.value.name)],
+                    value: APP.diff,
+                    onChanged: (v) {
+                      APP.diff = v;
                       APP.changed();
                     },
-                    child: Text(e.value.name),
                   ),
-                ),
+                  const SizedBox(height: 14),
+                  BigBtn('В бой', () {
+                    if (APP.force[APP.side].isEmpty) APP.force[APP.side] = APP.presetCounts(APP.side);
+                    APP.go(Screen.force);
+                  }, icon: Icons.play_arrow_rounded, h: 58),
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    Expanded(
+                      child: GhostBtn(APP.tutorial ? 'Обучение: вкл' : 'Обучение: выкл', () {
+                        APP.tutorial = !APP.tutorial;
+                        APP.changed();
+                      }, icon: Icons.school_outlined, on: APP.tutorial),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GhostBtn('Настройки', () {
+                        APP.settingsOpen = true;
+                        APP.changed();
+                      }, icon: Icons.settings_outlined),
+                    ),
+                  ]),
+                ]),
               ),
-          ]),
-          const SizedBox(height: 18),
-          BigBtn('В бой', () {
-            if (APP.force[APP.side].isEmpty) APP.force[APP.side] = APP.presetCounts(APP.side);
-            APP.go(Screen.force);
-          }),
-          const SizedBox(height: 8),
-          Row(children: [
-            Expanded(child: GhostBtn('Как играть', () => _how(context))),
-            const SizedBox(width: 8),
-            Expanded(
-                child: GhostBtn('Настройки', () {
-              APP.settingsOpen = true;
-              APP.changed();
-            })),
-          ]),
-        ]),
-      ),
-    );
-  }
-
-  void _how(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: C.sheet,
-      isScrollControlled: true,
-      builder: (_) => SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(18),
-          child: DefaultTextStyle(
-            style: body(13, h: 1.5),
-            child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Управление', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-              SizedBox(height: 10),
-              Text('Касание. Коснитесь отряда, затем земли: отряд пойдёт туда. Коснитесь видимого врага: сосредоточить огонь. Пальцем тяните карту, двумя пальцами масштабируйте.'),
-              SizedBox(height: 8),
-              Text('Мышь. Левая кнопка: выбор и рамка. Правая: приказ. Колесо: масштаб.'),
-              SizedBox(height: 8),
-              Text('Бой. Огонь подавляет: прижатая пехота не двигается и стреляет хуже, а потом теряет стойкость и отступает. Лес и здания дают укрытие, но закрывают обзор. Окопавшийся отряд получает защиту.'),
-              SizedBox(height: 8),
-              Text('Поддержка. Миномёт без наблюдателя бьёт неточно. БПЛА открывает карту, FPV бьёт по видимой цели, дым закрывает обзор.'),
-            ]),
+            ),
           ),
-        ),
+        ]),
       ),
     );
   }
@@ -167,18 +104,32 @@ class _SideBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final on = APP.side == s;
     final c = C.side(s);
-    return GestureDetector(
+    return Press(
+      sound: true,
+      scale: .96,
       onTap: () {
         APP.side = s;
         APP.changed();
       },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: on ? c.withValues(alpha: .16) : const Color(0x0AFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: on ? c : C.line, width: on ? 1.6 : 1)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(SIDES[s].name, style: body(15, w: FontWeight.w800)),
-          const SizedBox(height: 3),
-          Text(s == 0 ? 'Оборона · окопы, высота, ПТРК' : 'Наступление · броня, миномёт', style: body(11, color: C.mut)),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        height: 84,
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        decoration: BoxDecoration(
+          color: on ? c.withValues(alpha: .2) : const Color(0x0AFFFFFF),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: on ? c : C.line, width: on ? 2 : 1),
+        ),
+        child: Row(children: [
+          UnitIcon(s == 0 ? 'at' : 'tank', s, size: 40),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(SIDES[s].name.toUpperCase(), maxLines: 1, style: disp(15)),
+              const SizedBox(height: 3),
+              Text(s == 0 ? 'Оборона' : 'Наступление', style: body(12.5, color: on ? C.txt : C.mut, w: FontWeight.w600)),
+            ]),
+          ),
         ]),
       ),
     );
@@ -228,14 +179,14 @@ class ForceScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 6, 10, 4),
                     child: Row(children: [
-                      PillBtn(h: 38, r: 10, onTap: () => APP.go(Screen.menu), child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.close, size: 16), SizedBox(width: 4), Text('Отмена')])),
+                      RoundBtn(icon: Icons.arrow_back, size: 42, onTap: () => APP.go(Screen.menu)),
                       Expanded(
                         child: Column(children: [
-                          Text(SIDES[side].name.toUpperCase(), style: disp(15)),
+                          Text(SIDES[side].name.toUpperCase(), style: disp(17)),
                           Text('${side == 1 ? 'Наступление' : 'Оборона'} · отрядов $n из $MAX_UNITS', style: body(11, color: C.mut)),
                         ]),
                       ),
-                      PillBtn(h: 38, r: 10, enabled: n > 0, border: C.amber, onTap: CTL.startBattle, child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.check, size: 16, color: C.amber), SizedBox(width: 4), Text('К бою')])),
+                      const SizedBox(width: 42),
                     ]),
                   ),
                   SizedBox(
@@ -243,8 +194,9 @@ class ForceScreen extends StatelessWidget {
                     child: Row(children: [
                       for (int i = 0; i < SHOP_TABS.length; i++)
                         Expanded(
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
+                          child: Press(
+                            sound: true,
+                            scale: .97,
                             onTap: () {
                               APP.shopTab = i;
                               APP.shopSel = null;
@@ -253,7 +205,7 @@ class ForceScreen extends StatelessWidget {
                             child: Container(
                               alignment: Alignment.center,
                               decoration: BoxDecoration(border: Border(bottom: BorderSide(color: i == APP.shopTab ? C.amber : C.line, width: 2))),
-                              child: Text(SHOP_TABS[i].$1, style: body(13, color: i == APP.shopTab ? C.amber : C.mut, w: FontWeight.w700)),
+                              child: Text(SHOP_TABS[i].$1, style: body(14, color: i == APP.shopTab ? C.amber : C.mut, w: FontWeight.w700)),
                             ),
                           ),
                         ),
@@ -271,7 +223,9 @@ class ForceScreen extends StatelessWidget {
                         final v = list[i];
                         final on = v.id == APP.shopSel, poor = v.cost > left;
                         final k = c[v.id] ?? 0;
-                        return GestureDetector(
+                        return Press(
+                          sound: true,
+                          scale: .95,
                           onTap: () {
                             APP.shopSel = v.id;
                             APP.changed();
@@ -284,7 +238,7 @@ class ForceScreen extends StatelessWidget {
                               decoration: BoxDecoration(color: on ? C.amber.withValues(alpha: .1) : const Color(0x0DFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: on ? C.amber : C.line, width: on ? 1.6 : 1)),
                               child: Stack(children: [
                                 Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                                  Text(v.name, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: body(11, w: FontWeight.w700)),
+                                  Text(v.name, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: body(12, w: FontWeight.w700)),
                                   Expanded(child: Center(child: UnitIcon(v.cls, side, size: 46))),
                                   Text('◆ ${v.cost.toInt()}', textAlign: TextAlign.center, style: mono(12, color: C.amber)),
                                 ]),
@@ -378,6 +332,8 @@ class ForceScreen extends StatelessWidget {
                           APP.changed();
                         })),
                       ]),
+                      const SizedBox(height: 10),
+                      BigBtn('К бою', n > 0 ? CTL.startBattle : null, icon: Icons.check_rounded, h: 56),
                     ]),
                   ),
                 ]),
@@ -397,7 +353,7 @@ class _ShopBtn extends StatelessWidget {
   final VoidCallback onTap;
   const _ShopBtn(this.ic, this.t, this.en, this.onTap);
   @override
-  Widget build(BuildContext context) => PillBtn(h: 44, r: 10, enabled: en, onTap: onTap, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(ic, size: 18), const SizedBox(width: 6), Text(t, style: body(14, w: FontWeight.w700))]));
+  Widget build(BuildContext context) => GhostBtn(t, en ? onTap : null, icon: ic);
 }
 
 /* ---------- итог боя ---------- */
@@ -412,22 +368,29 @@ class EndScreen extends StatelessWidget {
     Widget row(String a, int x, int y) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: Row(children: [
-            Expanded(child: Text(a, style: body(13, color: C.mut))),
-            SizedBox(width: 70, child: Text('$x', textAlign: TextAlign.right, style: mono(14))),
-            SizedBox(width: 90, child: Text('$y', textAlign: TextAlign.right, style: mono(14))),
+            Expanded(child: Text(a, style: body(14, color: C.mut))),
+            SizedBox(width: 60, child: Text('$x', textAlign: TextAlign.right, style: mono(16, color: C.side(S.player)))),
+            SizedBox(width: 90, child: Text('$y', textAlign: TextAlign.right, style: mono(16, color: C.side(1 - S.player)))),
           ]),
         );
-    return Container(
-      color: const Color(0xB3000000),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutBack,
+      builder: (_, v, child) => Container(
+        color: Color.fromRGBO(0, 0, 0, .7 * v.clamp(0.0, 1.0)),
+        child: Opacity(opacity: v.clamp(0.0, 1.0), child: Transform.scale(scale: .85 + .15 * v, child: child)),
+      ),
       child: _Card(
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Icon(win ? Icons.military_tech : Icons.flag_outlined, size: 54, color: win ? C.amber : C.bad),
           Text(win ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ', textAlign: TextAlign.center, style: disp(32, color: win ? C.ok : C.bad, ls: .12)),
           const SizedBox(height: 6),
           Text('${o.why} · ${fmtTime(S.t)} боя', textAlign: TextAlign.center, style: body(13, color: C.mut)),
           const SizedBox(height: 14),
           Row(children: [
             const Expanded(child: SizedBox()),
-            SizedBox(width: 70, child: Text('Вы', textAlign: TextAlign.right, style: body(11, color: C.mut))),
+            SizedBox(width: 60, child: Text('Вы', textAlign: TextAlign.right, style: body(11, color: C.mut))),
             SizedBox(width: 90, child: Text('Противник', textAlign: TextAlign.right, style: body(11, color: C.mut))),
           ]),
           row('Потеряно бойцов', st.lost[m], st.lost[e]),
@@ -455,62 +418,58 @@ class EndScreen extends StatelessWidget {
 class SettingsSheet extends StatelessWidget {
   const SettingsSheet({super.key});
 
-  Widget _sw(bool v, VoidCallback f) => GestureDetector(
-        onTap: f,
-        child: Container(
-          width: 46,
-          height: 26,
-          padding: const EdgeInsets.all(3),
-          alignment: v ? Alignment.centerRight : Alignment.centerLeft,
-          decoration: BoxDecoration(color: v ? C.amber : const Color(0x26FFFFFF), borderRadius: BorderRadius.circular(13)),
-          child: Container(width: 20, height: 20, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
-        ),
+  Widget _row(String t, Widget w) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        child: Row(children: [Expanded(child: Text(t, style: body(15, w: FontWeight.w600))), const SizedBox(width: 10), w]),
       );
 
   @override
   Widget build(BuildContext context) {
+    final inGame = hasBattle && APP.screen == Screen.game;
+    void close() {
+      APP.settingsOpen = false;
+      APP.changed();
+    }
+
     return Container(
       color: const Color(0xB3000000),
       child: _Card(
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text('НАСТРОЙКИ', style: disp(16)),
-          const SizedBox(height: 14),
           Row(children: [
-            Expanded(child: Text('Звук', style: body(14))),
-            _sw(APP.sound, () {
-              APP.sound = !APP.sound;
-              APP.changed();
-            }),
+            Expanded(child: Text('НАСТРОЙКИ', style: disp(20))),
+            RoundBtn(icon: Icons.close, size: 40, onTap: close),
           ]),
-          const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: Text('Счётчик кадров и нагрузки', style: body(14))),
-            _sw(APP.showPerf, () {
-              APP.showPerf = !APP.showPerf;
-              APP.changed();
-            }),
-          ]),
-          const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: Text('Проверка нагрузки: +120 отрядов, ИИ ведёт обе стороны', style: body(14))),
-            const SizedBox(width: 10),
-            SizedBox(
-                width: 100,
-                child: GhostBtn('Запустить', hasBattle && APP.screen == Screen.game
-                    ? () {
-                        APP.settingsOpen = false;
-                        APP.changed();
-                        CTL.stress(120);
-                      }
-                    : null)),
-          ]),
-          const SizedBox(height: 12),
-          Text('Графика нарисована кодом. Загрузка собственных картинок появится в следующей версии.', style: body(12, color: C.mut, h: 1.45)),
-          const SizedBox(height: 18),
-          BigBtn('Готово', () {
-            APP.settingsOpen = false;
+          const SizedBox(height: 10),
+          _row('Звук', Toggle(APP.sound, () {
+            APP.sound = !APP.sound;
             APP.changed();
-          }),
+          })),
+          _row('Вибрация', Toggle(APP.haptics, () {
+            APP.haptics = !APP.haptics;
+            APP.changed();
+          })),
+          _row('Обучение в следующем бою', Toggle(APP.tutorial, () {
+            APP.tutorial = !APP.tutorial;
+            APP.changed();
+          })),
+          _row('Счётчик кадров', Toggle(APP.showPerf, () {
+            APP.showPerf = !APP.showPerf;
+            APP.changed();
+          })),
+          if (inGame) ...[
+            const SizedBox(height: 8),
+            GhostBtn('Проверка нагрузки: +120 отрядов', () {
+              close();
+              CTL.stress(120);
+            }, icon: Icons.speed),
+            const SizedBox(height: 8),
+            GhostBtn('Выйти в меню', () {
+              close();
+              CTL.toMenu();
+            }, icon: Icons.logout),
+          ],
+          const SizedBox(height: 14),
+          BigBtn('Готово', close),
         ]),
       ),
     );

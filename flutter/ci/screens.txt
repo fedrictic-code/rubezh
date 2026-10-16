@@ -1,1 +1,1 @@
-menu,force,game,play,deck,end,settings
+menu,force,game,play,sel,deck,end,settings

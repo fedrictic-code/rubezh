@@ -24,6 +24,12 @@ jobs:
           flutter create --platforms=android,ios,macos,web --project-name rubezh --org com.rubezh . > ci_out/create.txt 2>&1 || true
           rm -f test/widget_test.dart
           sed -i 's/android:label="rubezh"/android:label="Рубеж"/' android/app/src/main/AndroidManifest.xml || true
+      - name: Шрифт Russo One (OFL)
+        run: |
+          mkdir -p assets/fonts
+          [ -s assets/fonts/RussoOne-Regular.ttf ] || curl -fsSL -o assets/fonts/RussoOne-Regular.ttf https://github.com/google/fonts/raw/main/ofl/russoone/RussoOne-Regular.ttf
+          [ -s assets/fonts/OFL.txt ] || curl -fsSL -o assets/fonts/OFL.txt https://github.com/google/fonts/raw/main/ofl/russoone/OFL.txt || true
+          cp assets/fonts/* ci_out/ || true
       - name: pub get
         run: flutter pub get > ci_out/pubget.txt 2>&1 || (cat ci_out/pubget.txt; exit 1)
       - name: analyze

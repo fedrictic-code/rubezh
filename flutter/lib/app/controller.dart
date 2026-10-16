@@ -9,7 +9,9 @@ import '../game/combat.dart';
 import '../game/core.dart';
 import '../game/data.dart';
 import '../gfx/render.dart';
+import 'fx.dart';
 import 'model.dart';
+import 'tutorial.dart';
 
 class LogItem {
   final String text, kind;
@@ -44,7 +46,10 @@ class GameCtl extends ChangeNotifier {
   final List<LogItem> log = [];
   double acc = 0;
   Timer? endTimer;
-  bool infoOpen = false;
+  bool infoOpen = false, moreOpen = false;
+  // счётчики для обучения
+  int nOrders = 0, nAttacks = 0, nDeployMoves = 0, nDeckOpen = 0;
+  final List<int> _owners = [];
 
   void changed() => notifyListeners();
 
@@ -52,7 +57,8 @@ class GameCtl extends ChangeNotifier {
   void addLog(String text, String kind, double x, double y) {
     if (UI.menu) return;
     log.add(LogItem(text, kind, x, y, nowMs()));
-    while (log.length > 5) {
+    if (text.startsWith('Подкрепление')) Fx.play('radio', .45);
+    while (log.length > 3) {
       log.removeAt(0);
     }
   }
@@ -62,6 +68,11 @@ class GameCtl extends ChangeNotifier {
     toastUntil = nowMs() + ms;
     toastIsMode = false;
     notifyListeners();
+  }
+
+  void warn(String msg, [int ms = 2600]) {
+    toast(msg, ms);
+    Fx.deny();
   }
 
   static const Map<String, String> _modeText = {
@@ -124,6 +135,12 @@ class GameCtl extends ChangeNotifier {
 
   void onSel() {
     if (UI.mode == 'fire' && !selSquads().any((q) => q.t.mortar)) setMode(null);
+    if (S.sel.isNotEmpty) {
+      Fx.select();
+    } else {
+      moreOpen = false;
+      infoOpen = false;
+    }
     notifyListeners();
   }
 
@@ -138,6 +155,9 @@ class GameCtl extends ChangeNotifier {
     if (hit != null && hit.enemy) {
       issue(sel, 'attack', wx, wy, hit.sq.id);
       ping(hit.sq.x, hit.sq.y, 'atk');
+      nOrders++;
+      nAttacks++;
+      Fx.order();
       setMode(null);
       return;
     }
@@ -145,21 +165,28 @@ class GameCtl extends ChangeNotifier {
     if (kind == 'fire') {
       final mq = sel.where((q) => q.t.mortar).toList();
       if (mq.isEmpty) {
-        toast('Выберите миномётный расчёт');
+        warn('Выберите миномётный расчёт');
         return;
       }
       if (S.fog[cellIdx(wx, wy)] == 0) {
-        toast('Нет данных о цели: сначала разведайте район');
+        warn('Нет данных о цели: сначала разведайте район');
         return;
       }
       issue(mq, 'fire', wx, wy);
       ping(wx, wy, 'fire');
+      nOrders++;
+      Fx.order();
       setMode(null);
       return;
     }
     final failed = issue(sel, kind, wx, wy);
     ping(wx, wy, kind);
-    if (failed > 0) toast('Путь не найден для $failed отр.');
+    if (failed > 0) {
+      warn('Путь не найден для $failed отр.');
+    } else {
+      nOrders++;
+      Fx.order();
+    }
     setMode(null);
   }
 
@@ -172,45 +199,50 @@ class GameCtl extends ChangeNotifier {
     }
     if (c == 'ambush' || c == 'cease') {
       if (sel.isEmpty) {
-        toast('Сначала выберите отряд');
+        warn('Сначала выберите отряд');
         return;
       }
       final all = sel.every((q) => q.stance == c);
       setStance(sel, all ? 'free' : c);
+      Fx.order();
       toast(all ? 'Огонь по готовности' : (c == 'ambush' ? 'Засада: огонь откроют на 110 м или при обстреле' : 'Отряды не открывают огонь'), 2000);
       return;
     }
     if (c == 'dismount') {
       final vs = sel.where((q) => q.cargo != 0).toList();
       if (vs.isEmpty) {
-        toast('Нет пехоты на броне у выбранных машин');
+        warn('Нет пехоты на броне у выбранных машин');
         return;
       }
       for (final v in vs) {
         dismountVeh(v);
       }
+      Fx.order();
       notifyListeners();
       return;
     }
     if (c == 'hold' || c == 'retreat') {
       if (sel.isEmpty) {
-        toast('Сначала выберите отряд');
+        warn('Сначала выберите отряд');
         return;
       }
       issue(sel, c, 0, 0);
+      nOrders++;
+      Fx.order();
       setMode(null);
       return;
     }
     if (sel.isEmpty) {
-      toast('Сначала выберите отряд');
+      warn('Сначала выберите отряд');
       return;
     }
     if (c == 'fire' && !sel.any((q) => q.t.mortar)) return;
     if (c == 'mount' && !sel.any((q) => !q.t.veh)) {
-      toast('Выберите пехотный отряд');
+      warn('Выберите пехотный отряд');
       return;
     }
     setMode(UI.mode == c ? null : (c == 'move' ? null : c));
+    Fx.tap();
     if (c == 'move') toast('Коснитесь земли, чтобы отдать приказ о движении', 2200);
   }
 
@@ -218,10 +250,11 @@ class GameCtl extends ChangeNotifier {
     if (!hasBattle) return;
     if (!canUse(S.player, k)) {
       final a = S.ab[S.player][k]!;
-      toast(a.ch <= 0 ? 'Запас исчерпан' : 'Перезарядка: ${a.cd.ceil()} с');
+      warn(a.ch <= 0 ? 'Запас исчерпан' : 'Перезарядка: ${a.cd.ceil()} с');
       return;
     }
     setMode(UI.mode == k ? null : k);
+    Fx.tap();
   }
 
   void applyMode(double wx, double wy, Hit? hit) {
@@ -233,7 +266,7 @@ class GameCtl extends ChangeNotifier {
       err = useSmoke(S.player, wx, wy);
     } else if (m == 'fpv') {
       if (hit == null || !hit.enemy) {
-        toast('Нужна видимая цель');
+        warn('Нужна видимая цель');
         return;
       }
       err = useFpv(S.player, hit.sq.id);
@@ -241,17 +274,18 @@ class GameCtl extends ChangeNotifier {
       err = useArty(S.player, wx, wy);
     } else if (m == 'mount') {
       if (hit == null || hit.enemy || hit.sq.t.cap == 0) {
-        toast('Нужна своя бронированная машина с десантом');
+        warn('Нужна своя бронированная машина с десантом');
         return;
       }
       final inf = selSquads().where((q) => !q.t.veh).toList();
       if (inf.any((q) => q.men > hit.sq.t.cap)) {
-        toast('Отряд не поместится');
+        warn('Отряд не поместится');
       } else if (hit.sq.cargo != 0) {
-        toast('Машина уже занята');
+        warn('Машина уже занята');
       } else {
         issue(inf.take(1).toList(), 'mount', hit.sq.x, hit.sq.y, hit.sq.id);
         ping(hit.sq.x, hit.sq.y, 'move');
+        Fx.order();
         setMode(null);
       }
       return;
@@ -260,9 +294,10 @@ class GameCtl extends ChangeNotifier {
       return;
     }
     if (err != null) {
-      toast(err);
+      warn(err);
     } else {
       ping(wx, wy, m ?? 'move');
+      Fx.order();
       setMode(null);
     }
   }
@@ -342,6 +377,7 @@ class GameCtl extends ChangeNotifier {
   void togglePause() {
     if (!hasBattle || S.deploying) return;
     paused = !paused;
+    Fx.tap();
     if (paused) toast('Пауза: приказы можно отдавать', 1800);
     notifyListeners();
   }
@@ -349,11 +385,14 @@ class GameCtl extends ChangeNotifier {
   void setSpeed(int n) {
     if (!hasBattle) return;
     S.speed = n.toDouble();
+    Fx.tap();
     notifyListeners();
   }
 
   void toggleDeck() {
     deckOpen = !deckOpen;
+    if (deckOpen) nDeckOpen++;
+    Fx.tap();
     notifyListeners();
   }
 
@@ -402,6 +441,9 @@ class GameCtl extends ChangeNotifier {
     toastMsg = '';
     toastIsMode = false;
     multi = false;
+    moreOpen = false;
+    infoOpen = false;
+    _owners.clear();
     S.deploying = true;
     cam.z = clamp(View.w / 1300, .2, .85);
     cam.x = APP.side == 0 ? 1740 : 330;
@@ -412,6 +454,8 @@ class GameCtl extends ChangeNotifier {
     APP.endShown = false;
     endTimer?.cancel();
     APP.go(Screen.game);
+    TUT.start();
+    if (!TUT.active) toast('Расставьте отряды в светлой зоне и нажмите «В бой»', 6000);
     notifyListeners();
   }
 
@@ -420,11 +464,15 @@ class GameCtl extends ChangeNotifier {
     S.deploying = false;
     paused = false;
     S.sel.clear();
-    toast(
+    Fx.play('radio', .6);
+    Fx.haptic(1);
+    if (!TUT.active) {
+      toast(
         APP.side == S.atk
             ? 'Возьмите село Дубки и высоту 112 и держите их ${HOLD_NEED.toInt()} с. Выберите отряд и коснитесь карты.'
             : 'Продержитесь ${(LIMIT / 60).toInt()} минут. Не отдавайте село Дубки и высоту 112.',
         6000);
+    }
   }
 
   void deployTap(double wx, double wy, Hit? hit) {
@@ -435,16 +483,16 @@ class GameCtl extends ChangeNotifier {
     }
     final sel = selSquads();
     if (sel.length != 1) {
-      toast('Сначала коснитесь своего отряда');
+      warn('Сначала коснитесь своего отряда');
       return;
     }
     if (wx < z.x0 || wx > z.x1 || wy < z.y0 || wy > z.y1) {
-      toast('Отряды ставятся только в подсвеченной зоне');
+      warn('Отряды ставятся только в подсвеченной зоне');
       return;
     }
     final q = sel[0], mv = q.t.veh ? T_MV_V : T_MV_I;
     if (mv[ter[cellIdx(wx, wy)]] == 0) {
-      toast('Сюда нельзя встать');
+      warn('Сюда нельзя встать');
       return;
     }
     q.x = wx;
@@ -452,6 +500,8 @@ class GameCtl extends ChangeNotifier {
     q.path = null;
     if (q.order != null && q.order!.kind == 'hold') q.post = Pt(wx, wy);
     ping(wx, wy, 'move');
+    nDeployMoves++;
+    Fx.tap();
     perception();
     fogUpdate();
   }
@@ -461,8 +511,32 @@ class GameCtl extends ChangeNotifier {
     endTimer = Timer(const Duration(milliseconds: 1400), () {
       APP.endInfo = o;
       APP.endShown = true;
+      Fx.play(o.winner == S.player ? 'win' : 'lose', .7);
+      Fx.haptic(2);
       APP.changed();
     });
+  }
+
+  /// Вызывается ~10 раз в секунду: события, которые надо озвучить.
+  void watch() {
+    if (!hasBattle || S.deploying) return;
+    if (_owners.length != S.objs.length) {
+      _owners
+        ..clear()
+        ..addAll(S.objs.map((o) => o.owner));
+      return;
+    }
+    for (int i = 0; i < S.objs.length; i++) {
+      final o = S.objs[i];
+      if (o.owner == _owners[i]) continue;
+      _owners[i] = o.owner;
+      if (o.owner == S.player) {
+        Fx.play('capture', .6);
+        Fx.haptic(1);
+      } else if (o.owner >= 0) {
+        Fx.play('radio', .6);
+      }
+    }
   }
 
   void toMenu() {
@@ -493,4 +567,5 @@ final GameCtl CTL = GameCtl();
 void wireHooks() {
   HOOK.onLog = (t, k, x, y) => CTL.addLog(t, k, x, y);
   HOOK.onOver = (o) => CTL.onOver(o);
+  HOOK.onSfx = (k, x, y, v) => Fx.world(k, x, y, v, paused: CTL.paused);
 }
