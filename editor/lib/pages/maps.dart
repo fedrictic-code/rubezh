@@ -1,6 +1,5 @@
 // Раздел «Карты»: новая карта из PNG/JPG, разметка местности кистью, рубежи, зоны, базы, точки ИИ.
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:file_selector/file_selector.dart';
