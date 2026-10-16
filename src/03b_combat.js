@@ -32,6 +32,7 @@ function mkSquad(side, vid, x, y) {
   };
   const cell = cellIdx(x, y), mv = t.veh ? T_MV_V : T_MV_I;
   if (mv[ter[cell]] === 0) { const n = nearestPassable(cell, mv); sq.x = (n % GW + .5) * CELL; sq.y = ((n / GW | 0) + .5) * CELL; }
+  { const used = new Set(S.squads.filter(s2 => s2.side === side && !s2.dead).map(s2 => s2.no)); sq.no = 0; for (let i = 1; i <= 16; i++) if (!used.has(i)) { sq.no = i; break; } }
   S.squads.push(sq); S.byId.set(sq.id, sq); return sq;
 }
 const NM = sq => sq.t.name;

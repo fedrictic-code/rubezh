@@ -41,13 +41,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-
 .obj .bar u{display:block;height:100%}
 .obj .bar u:first-child{background:var(--ua)}.obj .bar u:last-child{background:var(--ru);margin-left:auto}
 .obj.hold{border-color:rgba(227,179,65,.55)}
-#mini{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:46px;width:112px;height:70px;border-radius:8px;border:1px solid var(--line);background:#0a0d0f;pointer-events:auto;touch-action:none;box-shadow:0 4px 16px rgba(0,0,0,.4);opacity:.92}
-#log{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:46px;display:flex;flex-direction:column;gap:4px;max-width:min(280px,calc(100% - 160px));pointer-events:none}
-#log .it{pointer-events:auto;padding:4px 8px;border-radius:7px;background:var(--panel);border-left:3px solid var(--mut);font-size:11px;line-height:1.3;animation:in .2s ease-out;transition:opacity .6s}
-#log .it.good{border-color:var(--ok)}#log .it.bad{border-color:var(--bad)}#log .it.warn{border-color:var(--warn)}#log .it.info{border-color:#6c8cae}
-#log .it.out{opacity:0}
-@keyframes in{from{transform:translateX(-10px);opacity:0}}
-@media (max-width:640px){.right{grid-column:auto}.top{grid-template-columns:auto auto;justify-content:space-between;gap:4px}.objs{grid-column:1/-1;order:3}#mini{top:84px}#log{top:84px;max-width:calc(100% - 140px)}.clock{font-size:14px}}
+@media (max-width:640px){.right{grid-column:auto}.top{grid-template-columns:auto auto;justify-content:space-between;gap:4px}.objs{grid-column:1/-1;order:3}.clock{font-size:14px}}
 /* подбор сил и расстановка */
 .card.wide{width:min(720px,100%);padding:20px 20px 18px;max-height:calc(100dvh - 24px);display:flex;flex-direction:column}
 .fhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -60,11 +54,39 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-
 .fr b{font:600 14px var(--disp);letter-spacing:.03em}.fr p{margin:0;grid-column:2;font-size:11px;color:var(--mut);line-height:1.3}
 .fr .c{font:600 12px var(--mono);color:var(--amber);grid-row:span 2}
 .fr .st{grid-row:span 2;display:flex;align-items:center;gap:4px}.fr .st button{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:18px;line-height:1}.fr .st button[disabled]{opacity:.3}.fr .st i{min-width:22px;text-align:center;font:600 14px var(--mono);font-style:normal}
-#deployBar{position:absolute;left:50%;transform:translateX(-50%);top:44px;z-index:12;display:flex;gap:10px;align-items:center;padding:5px 5px 5px 12px;border-radius:12px;background:var(--panel2);border:1px solid rgba(227,179,65,.5);box-shadow:0 6px 20px rgba(0,0,0,.45);max-width:calc(100% - 24px);pointer-events:auto}
-#deployBar[hidden]{display:none}#deployBar b{display:inline;font:600 12px var(--disp);letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-right:8px}#deployBar span{font-size:11px;color:var(--mut);white-space:nowrap}
-#deployBar .go{margin:0;width:auto;height:34px;padding:0 14px;font-size:13px;white-space:nowrap;border-radius:9px;letter-spacing:.1em}
-.deploying .cmdwrap,.deploying #objs{display:none}
-@media (max-width:640px){#deployBar{top:84px}#deployBar span{white-space:normal}}
+/* закупка: вкладки, карусель, купить/продать, слоты */
+#force.screen{grid-template-columns:minmax(0,560px);justify-content:center;place-items:stretch;padding:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));background:linear-gradient(180deg,#0e1317,#07090b);overflow:hidden}
+.shopwrap{width:100%;min-width:0;height:100%;display:flex;flex-direction:column;gap:8px;min-height:0}
+.shopbar{display:grid;grid-template-columns:72px 1fr 72px;gap:8px;align-items:stretch}
+.sbtn{height:52px;border-radius:10px;border:1px solid var(--line);background:linear-gradient(180deg,#232a30,#151a1e);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:600 10px var(--disp);letter-spacing:.1em;text-transform:uppercase;color:var(--txt)}
+.sbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.sbtn.ok{color:var(--amber);border-color:rgba(227,179,65,.55)}
+.sttl{border-radius:10px;border:1px solid var(--line);background:linear-gradient(180deg,#232a30,#151a1e);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sttl b{font:600 20px var(--disp);letter-spacing:.12em;text-transform:uppercase}.sttl small{font-size:10px;color:var(--mut);letter-spacing:.06em}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.tabs button{height:34px;border-radius:8px 8px 0 0;border:1px solid var(--line);border-bottom:0;background:rgba(255,255,255,.04);color:var(--mut);font:600 12px var(--body);padding:0 2px;white-space:nowrap}
+.tabs button.on{background:rgba(227,179,65,.14);color:var(--amber);border-color:rgba(227,179,65,.5)}
+.car{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:14px calc(50% - 56px) 10px;touch-action:pan-x;scrollbar-width:none;min-height:176px;align-items:center}.car::-webkit-scrollbar{display:none}
+.vc{flex:none;scroll-snap-align:center;width:104px;height:132px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(180deg,#2a3239,#1a2025);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 6px 6px;position:relative;transform:scale(.86);opacity:.75;transition:transform .15s,opacity .15s}
+.vc .nm{font:600 12px/1.15 var(--disp);letter-spacing:.03em;text-align:center;min-height:28px;display:flex;align-items:center}
+.vc img{width:54px;height:54px;border-radius:10px}
+.vc .ct{font:600 12px var(--mono);color:var(--amber)}
+.vc.poor .ct{color:var(--bad)}
+.vc i{position:absolute;right:-4px;top:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--amber);color:#17130a;font:700 11px/20px var(--mono);font-style:normal;text-align:center}
+.vc.sel{transform:scale(1.08);opacity:1;border-color:var(--amber);background:linear-gradient(180deg,#39424a,#222a30)}
+.fdesc{text-align:center;padding:0 6px;min-height:78px}.fdesc h3{margin:0;font:600 20px var(--disp);letter-spacing:.06em}.fdesc p{margin:4px 0 0;font-size:12px;color:#c3ccd2;line-height:1.4}
+.fbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fbtns button{height:48px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(180deg,#2a3239,#171c20);font:600 14px var(--disp);letter-spacing:.1em;text-transform:uppercase;display:flex;gap:8px;align-items:center;justify-content:center}
+.fbtns button:first-child{border-color:rgba(126,194,122,.5);color:var(--ok)}.fbtns button:last-child{color:#e8a49c;border-color:rgba(224,88,74,.4)}
+.fbtns svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.fbtns button[disabled]{opacity:.35}
+.slots{flex:1;min-height:70px;overflow-y:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;align-content:start;touch-action:pan-y}
+.slot{height:58px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:2px;min-width:0}
+.slot.empty{background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.06)}
+.slot img{width:30px;height:30px;border-radius:6px}.slot span{font-size:9px;color:var(--mut);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cred{display:flex;flex-direction:column;gap:6px}.cred .fl{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}.cred .fl b{font:600 20px var(--mono);color:var(--amber);letter-spacing:0}
+.cred .fbar{margin:0}.cred .row2{margin:0}
+@media (max-height:700px){.car{min-height:150px}.vc{height:116px;width:92px}.vc img{width:44px;height:44px}.fdesc{min-height:62px}.sbtn,.fbtns button{height:42px}}
 /* студия графики */
 .stu{overflow:auto}.stu>*{flex-shrink:0}.stuBody{display:grid;grid-template-columns:minmax(0,380px) 1fr;gap:16px;margin:10px 0;min-height:0}
 .stuPrev canvas{width:100%;max-width:380px;aspect-ratio:360/260;border-radius:12px;border:1px solid var(--line);background:repeating-conic-gradient(#3a4a30 0 25%,#42543a 0 50%) 0 0/16px 16px;cursor:crosshair;touch-action:none}
@@ -75,62 +97,77 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-
 .sl select option,.sl select optgroup{background:#161c21;color:#e8edf0}
 .sl.chk{display:flex;gap:8px;align-items:center}.sl.chk>span{grid-column:auto}.sl.chk input{width:20px;height:20px;accent-color:var(--amber)}
 @media (max-width:760px){.stuBody{grid-template-columns:1fr}}
-#hint{position:absolute;left:50%;transform:translateX(-50%);bottom:92px;padding:5px 12px;border-radius:999px;background:var(--panel2);border:1px solid rgba(227,179,65,.5);font-size:12px;color:var(--txt);pointer-events:none;white-space:normal;text-align:center;max-width:min(80%,460px);overflow:hidden;text-overflow:ellipsis}
-/* нижняя панель: слева карточка отряда, справа способности и приказы */
-.dock{position:absolute;left:0;right:0;bottom:0;display:grid;gap:8px;padding:0 max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));grid-template-columns:minmax(0,290px) minmax(0,1fr);grid-template-areas:"sel cmd";align-items:end;pointer-events:none}
-.dock>*{pointer-events:auto}
-@media (max-width:700px){.dock{grid-template-columns:minmax(0,1fr);grid-template-areas:"cmd" "sel"}}
-#sel{grid-area:sel;padding:6px 8px;border-radius:10px}
-#sel .empty{color:var(--mut);font-size:12px;display:flex;flex-direction:column;gap:3px;align-items:flex-start;justify-content:center;min-height:34px}
-.lnk{background:none;border:0;padding:0;color:var(--amber);font-size:12px;text-decoration:underline;text-underline-offset:3px}
-#sel .row{display:flex;gap:8px;align-items:center}
-#sel .ico{width:28px;height:28px;border-radius:7px;flex:none}
-#sel .meta{min-width:0;flex:1;cursor:pointer}
-#sel .meta b{display:block;font:600 13px var(--disp);letter-spacing:.04em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#sel .meta b small{font:500 10px var(--body);color:var(--mut);letter-spacing:0;margin-left:6px}
-#sel .meta span{display:block;font-size:11px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-#sel .meta span s{text-decoration:none;color:var(--mut)}
-#sel .x{width:26px;height:26px;border-radius:7px;border:0;background:rgba(255,255,255,.06);font-size:16px;line-height:1;flex:none}
-#sel .men{display:flex;gap:3px;margin:5px 0 4px;align-items:center;min-height:8px}
-#sel .men i{width:7px;height:7px;border-radius:50%;background:var(--amber)}#sel .men i.d{background:rgba(255,255,255,.12)}
-#sel .men em{font:500 10px var(--mono);font-style:normal;color:var(--mut);margin-left:4px}
-.bars{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.bar3{font-size:9px;color:var(--mut);letter-spacing:.03em;line-height:1.1}
-.bar3 div{height:3px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:2px;overflow:hidden}
-.bar3 div u{display:block;height:100%;border-radius:2px}
-#sel .load{display:none;flex-wrap:wrap;gap:3px;margin:6px 0 0;max-height:64px;overflow:auto}
-#sel.open .load{display:flex}
-#sel .load span{font:500 10px var(--mono);padding:1px 5px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt)}#sel .load b{font-weight:600;color:var(--amber)}
-.chips{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;margin-top:5px;touch-action:pan-x}
-.chip{flex:none;display:flex;gap:4px;align-items:center;padding:2px 6px 2px 3px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid var(--line);font:500 10px var(--mono)}
-.chip img{width:18px;height:18px;border-radius:4px}
-.cmdwrap{grid-area:cmd;display:flex;flex-direction:column;gap:5px;min-width:0;align-items:flex-end;justify-self:end;max-width:100%}
-#cmds2{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;max-width:100%}#cmds2::-webkit-scrollbar{display:none}
-.cmd2{flex:none;height:26px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:11px;display:flex;gap:5px;align-items:center;white-space:nowrap}
-.cmd2 kbd,.cmd kbd,.ab span{display:none;font:500 8px var(--mono);color:var(--mut)}
-@media (hover:hover) and (min-width:900px){.cmd2 kbd{display:inline}}
-.cmd2.on{border-color:var(--amber);color:var(--amber);background:rgba(227,179,65,.12)}.cmd2[disabled]{opacity:.38}
-.rowb{display:flex;gap:8px;align-items:flex-end;max-width:100%}
-#cmds{display:flex;gap:4px}
-.cmd{flex:none;width:54px;height:44px;border-radius:10px;display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;font-size:9px;letter-spacing:.01em;line-height:1;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:0}
-.cmd svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.cmd.on{border-color:var(--amber);color:var(--amber);background:rgba(227,179,65,.12)}
-.cmd[disabled]{opacity:.38;cursor:default}
-.cmd.deck{border-color:rgba(126,194,122,.5);color:var(--ok)}
-#abil{display:flex;gap:4px}
-.ab{position:relative;width:40px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;overflow:hidden;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:0}
-.ab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px}
-.ab em{position:absolute;left:0;right:0;bottom:3px;text-align:center;font:600 10px var(--mono);font-style:normal;color:var(--amber);line-height:1}
-.ab span{position:absolute;left:3px;top:2px}
+/* нижняя часть: подсказка, журнал, приказы и панель из трёх частей (мини-карта, отряды, карточка) */
+.stack{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:5px;padding:0 max(8px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));pointer-events:none}
+.stack>*{pointer-events:auto}
+#hint{align-self:center;padding:5px 12px;border-radius:999px;background:var(--panel2);border:1px solid rgba(227,179,65,.5);font-size:12px;color:var(--txt);pointer-events:none;text-align:center;max-width:min(94%,460px)}
+#log{display:flex;flex-direction:column;gap:1px;pointer-events:none;max-width:78%}
+#log .it{pointer-events:auto;font:500 12px/1.3 var(--body);color:#e3d98a;text-shadow:0 1px 2px #000,0 0 3px #000;animation:in .2s ease-out;transition:opacity .6s}
+#log .it.good{color:#9ee09a}#log .it.bad{color:#ff8a6a}#log .it.warn{color:#f3b04e}#log .it.info{color:#cfd8e0}
+#log .it.out{opacity:0}
+@keyframes in{from{transform:translateX(-10px);opacity:0}}
+.orders{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;touch-action:pan-x}.orders::-webkit-scrollbar{display:none}
+#cmds,#cmds2{display:contents}
+.cmd{flex:none;height:30px;padding:0 11px;border-radius:999px;display:flex;gap:5px;align-items:center;font-size:12px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap}
+.cmd svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.cmd.on{border-color:var(--amber);color:var(--amber);background:rgba(227,179,65,.14)}
+.cmd[disabled]{opacity:.38}
+.dock{display:grid;grid-template-columns:minmax(96px,27%) minmax(108px,29%) minmax(0,1fr);gap:5px;align-items:stretch}
+.dkMini,.dkSq,.dkInfo{border-radius:10px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.dkMini{padding:4px;display:flex;flex-direction:column;gap:4px}
+#mini{position:static;width:100%;height:auto;aspect-ratio:8/5;border-radius:6px;border:1px solid var(--line);background:#0a0d0f;touch-action:none;box-shadow:none;opacity:1;display:block}
+.deckBtn{flex:1;min-height:30px;border-radius:7px;border:1px solid rgba(126,194,122,.5);background:rgba(126,194,122,.08);color:var(--ok);font-size:12px;display:flex;gap:5px;align-items:center;justify-content:center}
+.deckBtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+.deckBtn.on{border-color:var(--amber);color:var(--amber);background:rgba(227,179,65,.14)}
+.dkSq{padding:4px;display:flex;flex-direction:column;gap:4px}
+#sqgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;flex:1}
+.sq{position:relative;min-height:24px;border-radius:5px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:var(--txt);padding:0;display:grid;place-items:center;overflow:hidden}
+.sq b{font:700 12px var(--mono)}
+.sq i{position:absolute;right:2px;top:0;font:600 7px var(--mono);font-style:normal;color:var(--mut)}
+.sq u{position:absolute;left:2px;right:2px;bottom:1px;height:2px;border-radius:1px;background:var(--ok)}.sq u.m2{background:var(--amber)}.sq u.m1{background:var(--bad)}
+.sq.on{border-color:var(--amber);background:rgba(227,179,65,.2);color:#fff}
+.sq.supp{border-color:var(--warn)}.sq.rout{border-color:var(--bad);color:var(--bad)}.sq.carried{opacity:.5}
+.sq.no{opacity:.28;background:transparent;border-color:rgba(255,255,255,.08)}
+#abil{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.ab{position:relative;height:30px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.05);display:grid;place-items:center;overflow:hidden;padding:0;color:var(--txt)}
+.ab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:7px}
+.ab em{position:absolute;left:0;right:0;bottom:1px;text-align:center;font:600 9px var(--mono);font-style:normal;color:var(--amber);line-height:1}
+.ab span{display:none}
 .ab u{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55)}
 .ab.on{border-color:var(--amber);color:var(--amber);background:rgba(227,179,65,.12)}
 .ab.off{opacity:.45}
-@media (max-width:820px){.dock{grid-template-columns:minmax(0,230px) minmax(0,1fr)}.cmd{width:46px}.ab{width:34px}.rowb{gap:6px}}
-@media (max-width:700px){.cmdwrap{justify-self:stretch;align-items:stretch}.rowb{justify-content:space-between}}
-/* подкрепление */
-.sheet{position:absolute;right:max(8px,env(safe-area-inset-right,0px));top:42px;bottom:8px;width:min(330px,62%);z-index:20;overflow:auto;background:rgba(22,28,33,.97);border:1px solid var(--line);border-radius:12px;padding:8px 10px 10px;pointer-events:auto;touch-action:pan-y;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.dkInfo{padding:5px 7px;min-width:0;display:flex;flex-direction:column;gap:3px;justify-content:space-between;overflow:hidden}
+#sel .empty{color:var(--mut);font-size:11px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;justify-content:center;height:100%}
+.lnk{background:none;border:0;padding:0;color:var(--amber);font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.in-top{display:flex;align-items:center;gap:4px}
+.in-top b{flex:1;text-align:center;font:600 14px var(--disp);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:18px}
+.in-top .x,#sel .x{width:18px;height:18px;border-radius:5px;border:0;background:rgba(255,255,255,.08);font-size:13px;line-height:1;flex:none;padding:0}
+.in-btns{display:grid;grid-template-columns:1.5fr 1fr;gap:3px}
+.in-btns button{height:22px;border-radius:5px;border:1px solid var(--line);background:rgba(255,255,255,.06);font-size:10px;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.in-btns button.on{border-color:var(--amber);color:var(--amber);background:rgba(227,179,65,.14)}
+.in-mid{display:flex;gap:6px;align-items:center;min-width:0}
+.in-mid img{width:30px;height:30px;border-radius:6px;flex:none}
+.in-mid>div{min-width:0;flex:1}
+.men{display:flex;gap:2px;align-items:center;flex-wrap:wrap;min-height:8px}
+.men i{width:6px;height:6px;border-radius:50%;background:var(--amber)}.men i.d{background:rgba(255,255,255,.14)}
+.men em{font:500 10px var(--mono);font-style:normal;color:var(--mut);margin-left:3px}
+.hpb{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;min-width:30px}.hpb u{display:block;height:100%}
+.st{font-size:10px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}.st s{text-decoration:none;color:var(--mut)}
+.in-wp{display:flex;justify-content:space-between;gap:6px;font-size:10px;color:var(--mut);cursor:pointer;min-width:0}.in-wp span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.in-wp b{color:var(--amber);font:600 10px var(--mono);flex:none}
+.in-note{font-size:10px;color:var(--mut)}
+.bars{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.bar3{font-size:8px;color:var(--mut);line-height:1.1;white-space:nowrap}
+.bar3 div{height:3px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:2px;overflow:hidden}
+.bar3 div u{display:block;height:100%;border-radius:2px}
+#sel .load{display:none;flex-wrap:wrap;gap:3px;max-height:70px;overflow:auto}
+#sel.open .load{display:flex}
+#sel .load span{font:500 9px var(--mono);padding:1px 4px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt)}#sel .load b{font-weight:600;color:var(--amber)}
+.chips{display:flex;gap:3px;flex-wrap:wrap;overflow:hidden;max-height:60px}
+.chip{flex:none;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid var(--line);font:500 9px var(--mono)}
+/* подкрепление в бою: нижний лист */
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:20;max-height:62%;overflow:auto;background:#1a2127;border-top:1px solid var(--line);border-radius:14px 14px 0 0;padding:10px 12px max(12px,env(safe-area-inset-bottom,0px));pointer-events:auto;touch-action:pan-y;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
 .sheet h3{margin:0 0 6px;font:600 13px var(--disp);letter-spacing:.1em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.sheet h3 .x{margin-left:auto;width:28px;height:28px;border-radius:8px;border:0;background:rgba(255,255,255,.07);font-size:18px;line-height:1}
+.sheet h3 .x{margin-left:auto;width:30px;height:30px;border-radius:8px;border:0;background:rgba(255,255,255,.07);font-size:18px;line-height:1}
 .sheet h3 span{font:600 13px var(--mono);color:var(--amber);letter-spacing:0}
 .grid{display:grid;grid-template-columns:1fr;gap:5px}
 .uc{display:grid;grid-template-columns:34px 1fr;gap:2px 8px;align-items:center;text-align:left;padding:6px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
@@ -141,6 +178,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-
 .uc[disabled]{opacity:.42;cursor:default}
 .q{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;font:500 10px var(--mono);color:var(--mut)}
 .q i{font-style:normal;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.07)}
+/* расстановка */
+#deployMsg{position:absolute;left:50%;transform:translateX(-50%);top:92px;width:min(90%,360px);text-align:center;font:600 14px/1.35 var(--body);color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000;pointer-events:none;z-index:11}
+.beginBtn{position:absolute;right:max(10px,env(safe-area-inset-right,0px));top:48px;z-index:12;height:46px;padding:0 14px;border-radius:10px;border:1px solid rgba(227,179,65,.7);background:linear-gradient(180deg,#2a3138,#15191d);color:var(--amber);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.beginBtn[hidden]{display:none}
+.beginBtn svg{width:22px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.beginBtn span{font:600 11px var(--disp);letter-spacing:.14em;text-transform:uppercase}
+.deploying #objs,.deploying .orders{display:none}
+@media (orientation:landscape) and (max-height:520px){
+  .stack{flex-direction:row;flex-wrap:wrap;align-items:flex-end;justify-content:flex-end}
+  .dock{width:min(560px,62%)}
+  .dkMini{flex-direction:row}#mini{width:96px}.deckBtn{min-height:0}
+  .orders{order:-1;width:100%;justify-content:flex-end}
+  #log{position:absolute;left:8px;bottom:8px;max-width:30%}
+  #hint{position:absolute;bottom:130px;left:50%;transform:translateX(-50%)}
+}
 /* экраны */
 .screen{position:absolute;inset:0;z-index:30;display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));overflow:auto;touch-action:pan-y;background:linear-gradient(180deg,rgba(8,11,13,.55),rgba(8,11,13,.85))}
 .screen[hidden]{display:none}
@@ -179,7 +231,7 @@ details kbd{font:500 11px var(--mono);padding:1px 5px;border-radius:4px;backgrou
 .art div{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:12px}
 .art div:last-child{border:0}.art code{font:500 11px var(--mono);color:var(--amber)}.art small{color:var(--mut);grid-column:1/-1}
 .art button{background:none;border:0;color:var(--bad);font-size:11px;padding:0}
-#perf{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:88px;font:500 10px var(--mono);color:#b9f0b0;background:rgba(0,0,0,.6);padding:3px 6px;border-radius:5px;pointer-events:none;z-index:15}
+#perf{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:96px;font:500 10px var(--mono);color:#b9f0b0;background:rgba(0,0,0,.6);padding:3px 6px;border-radius:5px;pointer-events:none;z-index:15}
 @media (max-height:520px){.card{padding:16px 18px 14px;border-radius:14px}.card.wide{padding:14px 16px 12px}.card h1{font-size:40px}.card h2{margin:12px 0 6px}.brief{font-size:12px;line-height:1.4;margin-top:8px}.go{height:44px;margin-top:12px;font-size:15px}.side{padding:8px 12px 8px 16px}.screen{padding-top:8px;padding-bottom:8px}.res{font-size:34px}.fr{padding:5px 4px}}
 @media (prefers-reduced-motion:reduce){#log .it{animation:none}}
 </style>
@@ -200,40 +252,43 @@ details kbd{font:500 11px var(--mono);padding:1px 5px;border-radius:4px;backgrou
       </div>
     </header>
 
-    <canvas id="mini" width="240" height="150" aria-label="Мини-карта"></canvas>
-    <div id="log" aria-live="polite"></div>
-    <div id="hint" hidden></div>
+    <div id="deployMsg" hidden>Расставьте отряды на светлой части карты.<br>Когда будете готовы, нажмите «Начать».</div>
+    <button id="deployGo" class="beginBtn" hidden><svg viewBox="0 0 24 24"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg><span>Начать</span></button>
 
-    <div class="dock">
-      <div id="sel" class="glass"></div>
-      <div class="cmdwrap">
-      <div id="cmds2" hidden>
-        <button class="cmd2" data-cmd="sneak">Скрытно<kbd>C</kbd></button>
-        <button class="cmd2" data-cmd="ambush">Засада<kbd>V</kbd></button>
-        <button class="cmd2" data-cmd="cease">Не стрелять<kbd>X</kbd></button>
-        <button class="cmd2" data-cmd="mount">Посадка<kbd>G</kbd></button>
-        <button class="cmd2" data-cmd="dismount">Высадка<kbd>D</kbd></button>
-      </div>
-      <div class="rowb">
-        <div id="abil">
-          <button class="ab" data-ab="drone" aria-label="Разведывательный БПЛА"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M5 5l5 5M19 5l-5 5M5 19l5-5M19 19l-5-5"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg><span>Q</span><em></em><u></u></button>
-          <button class="ab" data-ab="fpv" aria-label="FPV-удар"><svg viewBox="0 0 24 24"><path d="M3 12 21 4l-6 17-3-7z"/></svg><span>Z</span><em></em><u></u></button>
-          <button class="ab" data-ab="smoke" aria-label="Дымовая завеса"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-7.9A5.5 5.5 0 0 1 17 8.5a3.7 3.7 0 0 1 .5 7.5z"/><path d="M8 21h8"/></svg><span>E</span><em></em><u></u></button>
-          <button class="ab" data-ab="arty" aria-label="Артиллерия"><svg viewBox="0 0 24 24"><path d="M4 18 14 8l3 3L7 21z"/><path d="M15 7l2-2 3 3-2 2M3 8h4M5 4v4"/></svg><span>T</span><em></em><u></u></button>
+    <div class="stack">
+      <div id="hint" hidden></div>
+      <div id="log" aria-live="polite"></div>
+      <div class="orders" id="orders" hidden>
+        <div id="cmds">
+          <button class="cmd" data-cmd="move"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg>Движение<kbd>M</kbd></button>
+          <button class="cmd" data-cmd="fight"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>Атака<kbd>A</kbd></button>
+          <button class="cmd" data-cmd="hold"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7z"/></svg>Окопаться<kbd>H</kbd></button>
+          <button class="cmd" data-cmd="retreat"><svg viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg>Отход<kbd>R</kbd></button>
+          <button class="cmd" data-cmd="fire" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="5"/><path d="M12 9 17 2M3 21h18"/></svg>Огонь<kbd>F</kbd></button>
         </div>
-      <div id="cmds">
-        <button class="cmd" data-cmd="move"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg>Движение<kbd>M</kbd></button>
-        <button class="cmd" data-cmd="fight"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>Атака<kbd>A</kbd></button>
-        <button class="cmd" data-cmd="hold"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7z"/></svg>Окопаться<kbd>H</kbd></button>
-        <button class="cmd" data-cmd="retreat"><svg viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg>Отход<kbd>R</kbd></button>
-        <button class="cmd" data-cmd="fire" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="5"/><path d="M12 9 17 2M3 21h18"/></svg>Огонь<kbd>F</kbd></button>
-        <button class="cmd deck" data-cmd="deck"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Резерв<kbd>B</kbd></button>
+        <div id="cmds2">
+          <button class="cmd" data-cmd="sneak">Скрытно</button>
+          <button class="cmd" data-cmd="mount">Посадка</button>
+          <button class="cmd" data-cmd="dismount">Высадка</button>
+        </div>
       </div>
-      </div>
+      <div class="dock">
+        <div class="dkMini">
+          <canvas id="mini" width="240" height="150" aria-label="Мини-карта"></canvas>
+          <button class="deckBtn" id="bDeck"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Резерв</button>
+        </div>
+        <div class="dkSq">
+          <div id="sqgrid"></div>
+          <div id="abil">
+        <button class="ab" data-ab="drone" aria-label="Разведывательный БПЛА"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M5 5l5 5M19 5l-5 5M5 19l5-5M19 19l-5-5"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg><span>Q</span><em></em><u></u></button>
+        <button class="ab" data-ab="fpv" aria-label="FPV-удар"><svg viewBox="0 0 24 24"><path d="M3 12 21 4l-6 17-3-7z"/></svg><span>Z</span><em></em><u></u></button>
+        <button class="ab" data-ab="smoke" aria-label="Дымовая завеса"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-7.9A5.5 5.5 0 0 1 17 8.5a3.7 3.7 0 0 1 .5 7.5z"/><path d="M8 21h8"/></svg><span>E</span><em></em><u></u></button>
+        <button class="ab" data-ab="arty" aria-label="Артиллерия"><svg viewBox="0 0 24 24"><path d="M4 18 14 8l3 3L7 21z"/><path d="M15 7l2-2 3 3-2 2M3 8h4M5 4v4"/></svg><span>T</span><em></em><u></u></button>
+        </div>
+        </div>
+        <div id="sel" class="dkInfo"></div>
       </div>
     </div>
-
-    <div id="deployBar" hidden><div><b>Расстановка</b><span>Коснитесь отряда, затем точки в зоне</span></div><button class="go" id="deployGo">Начать бой</button></div>
     <section id="deck" class="sheet" hidden></section>
   </div>
 
@@ -263,14 +318,19 @@ details kbd{font:500 11px var(--mono);padding:1px 5px;border-radius:4px;backgrou
     </div>
   </section>
 
-  <section id="force" class="screen" hidden>
-    <div class="card wide">
-      <div class="fhead"><div><h2 id="fTitle" style="margin:0">Подбор сил</h2><p class="sub" id="fSub"></p></div><div class="fbud"><b id="fBud"></b><small>очков</small></div></div>
-      <div class="fbar"><u id="fBar"></u></div>
-      <div id="fList"></div>
-      <div class="row2"><button class="ghost" id="fAuto">Рекомендуемый состав</button><button class="ghost" id="fClear">Очистить</button></div>
-      <button class="go" id="fGo">К расстановке</button>
-      <button class="ghost" id="fBack" style="width:100%;margin-top:8px;flex:none">Назад</button>
+  <section id="force" class="screen shop" hidden>
+    <div class="shopwrap">
+      <header class="shopbar">
+        <button class="sbtn" id="fBack" aria-label="Отмена"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span>Отмена</span></button>
+        <div class="sttl"><b id="fTitle">Подбор сил</b><small id="fSub"></small></div>
+        <button class="sbtn ok" id="fGo" aria-label="Готово"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>К бою</span></button>
+      </header>
+      <div class="tabs" id="fTabs"></div>
+      <div class="car" id="fCar"></div>
+      <div class="fdesc"><h3 id="fName"></h3><p id="fDesc"></p></div>
+      <div class="fbtns"><button id="fBuy"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Купить</button><button id="fSell"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>Продать</button></div>
+      <div class="slots" id="fSlots"></div>
+      <div class="cred"><div class="fl"><span>Очки</span><b id="fBud"></b></div><div class="fbar"><u id="fBar"></u></div><div class="row2"><button class="ghost" id="fAuto">Рекомендуемый состав</button><button class="ghost" id="fClear">Очистить</button></div></div>
     </div>
   </section>
 
@@ -1121,6 +1181,7 @@ function mkSquad(side, vid, x, y) {
   };
   const cell = cellIdx(x, y), mv = t.veh ? T_MV_V : T_MV_I;
   if (mv[ter[cell]] === 0) { const n = nearestPassable(cell, mv); sq.x = (n % GW + .5) * CELL; sq.y = ((n / GW | 0) + .5) * CELL; }
+  { const used = new Set(S.squads.filter(s2 => s2.side === side && !s2.dead).map(s2 => s2.no)); sq.no = 0; for (let i = 1; i <= 16; i++) if (!used.has(i)) { sq.no = i; break; } }
   S.squads.push(sq); S.byId.set(sq.id, sq); return sq;
 }
 const NM = sq => sq.t.name;
@@ -1572,6 +1633,7 @@ function drawPlates(g, sq, enemy, sel) {
   g.fillStyle = c.dark; g.globalAlpha = .94; g.beginPath(); g.roundRect(px, py, 30, 15, 4); g.fill(); g.globalAlpha = 1;
   g.strokeStyle = sel ? '#e3b341' : c.color; g.lineWidth = sel ? 2 : 1.4; g.stroke();
   const ic = art('icon_' + sq.type); if (ic) g.drawImage(ic.img, px + 2, py + 1.5, 12, 12); else drawGlyph(g, sq.type, px + 8.5, py + 7.5, 9, '#f1f3f4');
+  if (!enemy && sq.no) { g.fillStyle = sel ? '#e3b341' : '#0c1013'; g.strokeStyle = sel ? '#e3b341' : c.color; g.lineWidth = 1.4; g.beginPath(); g.arc(px - 2, py + 2, 7, 0, TAU); g.fill(); g.stroke(); g.fillStyle = sel ? '#17130a' : '#eef1f3'; g.font = '700 9px "IBM Plex Mono",monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(sq.no + '', px - 2, py + 2.5); }
   if (!enemy) { g.fillStyle = '#eef1f3'; g.font = '600 10px "IBM Plex Mono",monospace'; g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillText(sq.t.veh ? Math.max(1, Math.ceil(sq.hp / sq.hpMax * 100)) + '' : sq.men + '', px + 28, py + 8); }
   if (sq.cargo) { g.fillStyle = '#e3b341'; g.font = '700 9px "IBM Plex Mono",monospace'; g.textAlign = 'left'; g.fillText('+' + (S.byId.get(sq.cargo) ? S.byId.get(sq.cargo).men : ''), px + 2, py - 4); }
   if (!enemy && (sq.stance === 'ambush' || sq.stance === 'cease' || sq.sneak)) { g.fillStyle = '#e3b341'; g.font = '700 9px "IBM Plex Mono",monospace'; g.textAlign = 'right'; g.fillText(sq.stance === 'ambush' ? 'ЗАСАДА' : sq.stance === 'cease' ? 'ТИХО' : 'СКРЫТНО', px + 30, py - 4); }
@@ -2023,7 +2085,7 @@ HOOK.log = (text, kind, x, y) => {
 };
 function toast(msg, ms = 2600) { E.hint.textContent = msg; E.hint.hidden = false; E.hint._mode = false; hintT = performance.now() + ms; }
 function setMode(m) {
-  UI.mode = m; $$('.cmd', E.cmds).forEach(b => b.classList.toggle('on', b.dataset.cmd === m));
+  UI.mode = m; $$('.cmd', E.orders).forEach(b => b.classList.toggle('on', b.dataset.cmd === m));
   $$('.ab', E.abil).forEach(b => b.classList.toggle('on', b.dataset.ab === m));
   const TX = { sneak: 'Коснитесь точки: отряды двинутся скрытно, медленно и тихо', mount: 'Коснитесь своего БМП или БТР, чтобы пехота села на технику', arty: 'Коснитесь точки для артиллерийского удара. С наблюдателем точнее', fight: 'Коснитесь точки: отряды пойдут туда и вступят в бой', fire: 'Коснитесь цели для миномёта. Без наблюдателя огонь неточный', drone: 'Коснитесь точки разведки', smoke: 'Коснитесь точки для дымовой завесы', fpv: 'Коснитесь видимого противника' };
   if (m) { toast(TX[m], 600000); E.hint._mode = true; } else if (E.hint._mode) { E.hint.hidden = true; E.hint._mode = false; }
@@ -2160,29 +2222,50 @@ function statusOf(q) {
   if (o) { if (o.kind === 'move') return 'Движется'; if (o.kind === 'fight') return 'Атака <s>· идёт в бой</s>'; if (o.kind === 'attack') return 'Сближается с целью'; if (o.kind === 'hold') return q.fort > .9 ? 'Окопался <s>· защита повышена</s>' : 'Окапывается'; if (o.kind === 'retreat') return 'Отход'; if (o.kind === 'fire') return 'Миномётный огонь'; }
   return q.fort > .9 ? 'Окопался' : 'Ожидает приказа';
 }
+function sqTap(no) {
+  const q = S.squads.find(s => s.side === S.player && s.no === no && !s.dead && !s.carried); if (!q) return;
+  if (UI.multi || gestShift) { S.sel.has(q.id) ? S.sel.delete(q.id) : S.sel.add(q.id); onSel(); return; }
+  if (S.sel.size === 1 && S.sel.has(q.id)) { cam.x = q.x; cam.y = q.y; clampCam(); return; }
+  selectOnly(q);
+}
+function renderSqGrid() {
+  const mine = {}; for (const q of S.squads) if (q.side === S.player && !q.dead && q.no) mine[q.no] = q;
+  let sg = ''; for (let i = 1; i <= 16; i++) { const q = mine[i]; sg += i + (q ? ':' + (S.sel.has(q.id) ? 1 : 0) + (q.carried ? 'c' : '') + (q.rout ? 'r' : '') + (q.supp >= 75 ? 's' : '') + (q.t.veh ? 'v' : '') + (q.t.mortar ? 'm' : '') + (q.morale > 60 ? 3 : q.morale > 35 ? 2 : 1) : '') + ','; }
+  if (sg === E.sqgrid._s) return; E.sqgrid._s = sg;
+  let h = ''; for (let i = 1; i <= 16; i++) { const q = mine[i]; h += q ? '<button data-sq="' + i + '" class="sq' + (S.sel.has(q.id) ? ' on' : '') + (q.rout ? ' rout' : q.supp >= 75 ? ' supp' : '') + (q.carried ? ' carried' : '') + '" aria-label="' + q.name + '"><b>' + i + '</b><u class="m' + (q.morale > 60 ? 3 : q.morale > 35 ? 2 : 1) + '"></u><i>' + (q.t.veh ? '▬' : q.t.mortar ? '◔' : '') + '</i></button>' : '<button class="sq no" disabled><b>' + i + '</b></button>'; }
+  E.sqgrid.innerHTML = h;
+}
 function renderSel() {
   const sel = selSquads(); let h = '', sg = '';
-  if (!sel.length) { sg = 'e'; h = '<div class="empty">Коснитесь отряда на карте, чтобы выбрать его.<button class="lnk" data-act="all">Выбрать все отряды</button></div>'; }
+  if (!sel.length) { sg = 'e'; h = '<div class="empty">Выберите отряд на карте или по номеру слева.<button class="lnk" data-act="all">Выбрать все</button></div>'; }
   else if (sel.length === 1) {
-    const q = sel[0], n = [q.t.name, q.t.desc]; let pips = ''; if (q.t.veh) pips = '<div style="flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden"><u style="display:block;height:100%;width:' + (q.hp / q.hpMax * 100).toFixed(0) + '%;background:' + mcol(q.hp / q.hpMax * 100) + '"></u></div><em>' + Math.ceil(q.hp) + ' / ' + q.hpMax + '</em>'; else { for (let i = 0; i < q.max; i++) pips += '<i class="' + (i < q.men ? '' : 'd') + '"></i>'; pips += '<em>' + q.men + ' из ' + q.max + '</em>'; }
-    sg = [q.id, q.men, Math.ceil(q.hp), q.morale | 0, q.supp | 0, q.ammo | 0, q.order && q.order.kind, q.rout, q.fort > .9, q.tg && q.tg.id, q.crew.reduce((s, m2) => s + m2.ws.reduce((t2, w2) => t2 + Object.values(w2.am).reduce((x, y) => x + y, 0), 0), 0)].join(',');
-    h = '<div class="row"><img class="ico" src="' + iconURL(q.type, q.side) + '" alt=""><div class="meta" data-act="more"><b>' + q.name + '<small>' + n[0] + '</small></b><span>' + statusOf(q) + '</span></div><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div><div class="men">' + pips + '</div><div class="bars">' + bar('Стойкость', q.morale, mcol(q.morale)) + bar('Подавление', q.supp, 'var(--warn)') + bar('Боезапас', q.ammo, 'var(--mut)') + '</div><div class="load">' + loadoutOf(q).map(e => '<span>' + e.n + (e.c > 1 ? ' ×' + e.c : '') + ' <b>' + (e.k === 'rifle' || e.k === 'mg' || e.k === 'hmg' ? '' : Object.keys(e.ammo).map(k => AMMO[k].n + ' ' + e.ammo[k]).join(', ')) + '</b></span>').join('') + '</div>';
+    const q = sel[0], L = loadoutOf(q), main = L[0]; let pips = '';
+    if (q.t.veh) pips = '<div class="hpb"><u style="width:' + (q.hp / q.hpMax * 100).toFixed(0) + '%;background:' + mcol(q.hp / q.hpMax * 100) + '"></u></div><em>' + Math.ceil(q.hp) + '%</em>'; else { for (let i = 0; i < q.max; i++) pips += '<i class="' + (i < q.men ? '' : 'd') + '"></i>'; }
+    const rounds = main ? Object.values(main.ammo).reduce((x, y) => x + y, 0) : 0, am = main && main.ammo ? Object.keys(main.ammo)[0] : '';
+    sg = [q.id, q.men, Math.ceil(q.hp), q.morale | 0, q.supp | 0, q.ammo | 0, q.order && q.order.kind, q.rout, q.fort > .9, q.tg && q.tg.id, q.stance, q.sneak, rounds].join(',');
+    h = '<div class="in-top"><b>' + q.name + '</b><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div>'
+      + '<div class="in-btns"><button data-cmd="cease" class="' + (q.stance === 'cease' ? 'on' : '') + '">' + (q.stance === 'cease' ? 'Не стрелять' : 'Огонь по готовн.') + '</button><button data-cmd="ambush" class="' + (q.stance === 'ambush' ? 'on' : '') + '">Засада</button></div>'
+      + '<div class="in-mid"><img src="' + iconURL(q.type, q.side) + '" alt=""><div><div class="men">' + pips + '</div><div class="st">' + statusOf(q) + '</div></div></div>'
+      + '<div class="in-wp" data-act="more"><span>' + (main ? main.n + (main.c > 1 ? ' ×' + main.c : '') : q.t.name) + '</span><b>' + (main && rounds ? '▮ ×' + rounds : '') + '</b></div>'
+      + '<div class="bars">' + bar('Стойк.', q.morale, mcol(q.morale)) + bar('Подавл.', q.supp, 'var(--warn)') + bar('Боезап.', q.ammo, 'var(--mut)') + '</div>'
+      + '<div class="load">' + L.map(e => '<span>' + e.n + (e.c > 1 ? ' ×' + e.c : '') + ' <b>' + (e.k === 'rifle' || e.k === 'mg' || e.k === 'hmg' ? '' : Object.keys(e.ammo).map(k => AMMO[k].n + ' ' + e.ammo[k]).join(', ')) + '</b></span>').join('') + '</div>';
   } else {
     sg = 'm' + sel.map(q => q.id + ':' + q.men + ':' + (q.rout ? 1 : 0)).join(',');
-    h = '<div class="row"><div class="meta"><b>Выбрано отрядов: ' + sel.length + '</b><span>' + (UI.multi ? 'Режим добавления включён' : 'Приказ получат все') + '</span></div><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div><div class="chips">' + sel.map(q => '<span class="chip"><img src="' + iconURL(q.type, q.side) + '" alt="">' + q.name + ' · ' + (q.t.veh ? Math.ceil(q.hp / q.hpMax * 100) + '%' : q.men) + '</span>').join('') + '</div>';
+    h = '<div class="in-top"><b>Выбрано: ' + sel.length + '</b><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div><div class="in-note">' + (UI.multi ? 'Режим добавления включён' : 'Приказ получат все') + '</div><div class="chips">' + sel.map(q => '<span class="chip">' + q.no + ' ' + q.name + ' · ' + (q.t.veh ? Math.ceil(q.hp / q.hpMax * 100) + '%' : q.men) + '</span>').join('') + '</div>';
   }
-  const full = sg + '|' + (UI.multi ? 1 : 0); if (full === selSig) return; selSig = full; E.sel.innerHTML = h + (sel.length === 0 ? '' : '');
+  const full = sg + '|' + (UI.multi ? 1 : 0); if (full !== selSig) { selSig = full; E.sel.innerHTML = h; }
+  E.orders.hidden = !sel.length || !!(S && S.deploying);
   E.cmds.querySelector('[data-cmd="fire"]').hidden = !sel.some(q => q.t.mortar);
-  E.cmds2.hidden = !sel.length; if (sel.length) { const cm = k => E.cmds2.querySelector('[data-cmd="' + k + '"]'); cm('ambush').classList.toggle('on', sel.every(q => q.stance === 'ambush')); cm('cease').classList.toggle('on', sel.every(q => q.stance === 'cease')); cm('sneak').hidden = sel.every(q => q.t.veh); cm('mount').hidden = sel.every(q => q.t.veh); cm('dismount').hidden = !sel.some(q => q.cargo); }
+  E.cmds2.hidden = !sel.length; if (sel.length) { const cm = k => E.cmds2.querySelector('[data-cmd="' + k + '"]'); cm('sneak').hidden = sel.every(q => q.t.veh); cm('mount').hidden = sel.every(q => q.t.veh); cm('dismount').hidden = !sel.some(q => q.cargo); }
 }
 function renderHud(now) {
   if (!S) return; const left = LIMIT - S.t;
   E.clock.firstChild.nodeValue = fmtTime(left);
-  const inc = S.inc[S.player]; E.pts.innerHTML = '◆ ' + Math.floor(S.pts[S.player]) + '<small>+' + inc.toFixed(1) + '/с</small>';
+  const inc = S.inc[S.player]; E.pts.innerHTML = '◆ ' + Math.floor(S.pts[S.player]) + '<small>+' + inc.toFixed(1) + '/с</small>'; $('#bDeck').classList.toggle('on', !E.deck.hidden);
   let h = ''; for (const o of S.objs) { const own = o.owner >= 0 ? SIDES[o.owner].short : 'нейтрально'; const hold = o.key && S.holdT > 0 && S.objs.filter(x => x.key).every(x => x.owner === S.atk); h += '<div class="obj glass' + (hold ? ' hold' : '') + '"><b><span>' + o.name + '</span><i>' + (o.contested ? 'бой' : own) + '</i></b><div class="bar"><u style="width:' + ((1 - o.ctrl) * 50) + '%"></u><u style="width:' + ((1 + o.ctrl) * 50) + '%"></u></div></div>'; }
   if (S.holdT > 0) h += '<div class="obj glass hold"><b><span>Удержание</span><i>' + (S.atk === S.player ? 'цель' : 'угроза') + '</i></b><div class="bar" style="background:rgba(255,255,255,.1)"><u style="width:' + (S.holdT / HOLD_NEED * 100) + '%;background:var(--amber)"></u></div></div>';
   if (h !== E.objs._h) { E.objs.innerHTML = h; E.objs._h = h; }
-  renderSel(); renderDeck();
+  renderSel(); renderSqGrid(); renderDeck();
   $$('.ab', E.abil).forEach(b => { const a = S.ab[S.player][b.dataset.ab]; b.querySelector('em').textContent = '×' + a.ch; b.querySelector('u').style.height = a.cd > 0 ? (a.cd / AB_CD[b.dataset.ab] * 100) + '%' : '0'; b.classList.toggle('off', a.ch <= 0); b.querySelector('span').textContent = { drone: 'Q', fpv: 'Z', smoke: 'E', arty: 'T' }[b.dataset.ab]; });
   $$('.cmd', E.cmds).forEach(b => { if (b.dataset.cmd === 'deck') b.classList.toggle('on', !E.deck.hidden); });
   if (!E.hint.hidden && now > hintT) E.hint.hidden = true;
@@ -2193,12 +2276,12 @@ function renderHud(now) {
 /* ---------- старт, финиш ---------- */
 function startBattle() {
   sndInit(); const fc = [null, null]; fc[side] = forceList(side); newBattle(side, diff, fc); buildTerrain(); fogCv = null; fogBig = null; paused = false; E.bPause.innerHTML = IC.pause; setSpeed(1); UI.mode = null; UI.menu = false; UI.pings.length = 0; selSig = ''; deckSig = ''; E.deck.hidden = true; E.log.innerHTML = '';
-  E.menu.hidden = true; E.force.hidden = true; E.end.hidden = true; E.hud.hidden = false; setMode(null); S.deploying = true; paused = true; E.hud.classList.add('deploying'); E.deployBar.hidden = false;
+  E.menu.hidden = true; E.force.hidden = true; E.end.hidden = true; E.hud.hidden = false; setMode(null); S.deploying = true; paused = true; E.hud.classList.add('deploying'); E.deployMsg.hidden = false; E.deployGo.hidden = false;
   cam.z = clamp(VIEW.w / 1500, .38, .85); cam.x = side === 0 ? 1740 : 330; cam.y = 740; clampCam(); acc = 0;
   if (false) toast(side === S.atk ? 'Возьмите село Дубки и высоту 112 и держите их ' + HOLD_NEED + ' с. Выберите отряд и коснитесь карты.' : 'Продержитесь ' + (LIMIT / 60) + ' минут. Не отдавайте село Дубки и высоту 112.', 6000);
 }
 function beginBattle() {
-  if (!S || !S.deploying) return; S.deploying = false; paused = false; E.hud.classList.remove('deploying'); E.deployBar.hidden = true; S.sel.clear(); selSig = '';
+  if (!S || !S.deploying) return; S.deploying = false; paused = false; E.hud.classList.remove('deploying'); E.deployMsg.hidden = true; E.deployGo.hidden = true; S.sel.clear(); selSig = '';
   toast(side === S.atk ? 'Возьмите село Дубки и высоту 112 и держите их ' + HOLD_NEED + ' с. Выберите отряд и коснитесь карты.' : 'Продержитесь ' + (LIMIT / 60) + ' минут. Не отдавайте село Дубки и высоту 112.', 6000);
 }
 function deployTap(wx, wy, hit) {
@@ -2219,16 +2302,33 @@ function openForce() {
   if (!Object.keys(UI.force[side]).length) UI.force[side] = presetCounts(side);
   E.menu.hidden = true; E.force.hidden = false; renderForce();
 }
+const SHOP_TABS = [['Техника', ['ifv', 'tank']], ['Пехота', ['rifle', 'mg', 'sniper']], ['ПТ орудия', ['at']], ['Поддержка', ['mortar']]];
+UI.shop = { tab: 0, sel: null };
+function shopList() { return variantsFor(side).filter(v => SHOP_TABS[UI.shop.tab][1].includes(v.cls)); }
 function renderForce() {
   const c = UI.force[side], budget = budgetOf(side), used = forceCost(c), n = forceN(c), left = budget - used;
-  E.fTitle.textContent = 'Подбор сил · ' + SIDES[side].name; E.fSub.textContent = (side === 1 ? 'Наступление' : 'Оборона') + ' · отрядов ' + n + ' из ' + MAX_UNITS;
-  E.fBud.textContent = used + ' / ' + budget; E.fBar.style.width = Math.min(100, used / budget * 100) + '%';
-  let h = ''; const names = { rifle: 'Пехота', mg: 'Пулемёты', at: 'Противотанковые', sniper: 'Снайперы', mortar: 'Миномёты', ifv: 'Боевые машины', tank: 'Танки' };
-  for (const k of TYPE_ORDER) {
-    const vs = variantsFor(side).filter(v => v.cls === k); if (!vs.length) continue; h += '<h4>' + names[k] + '</h4>';
-    for (const v of vs) { const q = c[v.id] || 0; h += '<div class="fr"><img src="' + iconURL(v.cls, side) + '" alt=""><b>' + v.name + '</b><span class="c">◆ ' + v.cost + '</span><div class="st"><button data-f="' + v.id + '" data-d="-1"' + (q ? '' : ' disabled') + ' aria-label="Убрать">−</button><i>' + q + '</i><button data-f="' + v.id + '" data-d="1"' + (v.cost > left || n >= MAX_UNITS ? ' disabled' : '') + ' aria-label="Добавить">+</button></div><p>' + v.desc + ' · ' + v.hint + '</p></div>'; }
-  }
-  E.fList.innerHTML = h; $('#fGo').disabled = n === 0; $('#fGo').style.opacity = n ? 1 : .4;
+  E.fTitle.textContent = SIDES[side].name; E.fSub.textContent = (side === 1 ? 'Наступление' : 'Оборона') + ' · отрядов ' + n + ' из ' + MAX_UNITS;
+  E.fBud.textContent = left + ' из ' + budget; E.fBar.style.width = Math.min(100, used / budget * 100) + '%';
+  E.fTabs.innerHTML = SHOP_TABS.map((t, i) => '<button data-tab="' + i + '" class="' + (i === UI.shop.tab ? 'on' : '') + '">' + t[0] + '</button>').join('');
+  const list = shopList(); if (!list.length) { E.fCar.innerHTML = ''; return; } if (!list.some(v => v.id === UI.shop.sel)) UI.shop.sel = list[0].id;
+  E.fCar.innerHTML = list.map(v => '<button class="vc' + (v.id === UI.shop.sel ? ' sel' : '') + (v.cost > left ? ' poor' : '') + '" data-v="' + v.id + '"><span class="nm">' + v.name + '</span><img src="' + iconURL(v.cls, side) + '" alt=""><span class="ct">◆ ' + v.cost + '</span>' + (c[v.id] ? '<i>' + c[v.id] + '</i>' : '') + '</button>').join('');
+  shopSelect(UI.shop.sel, true);
+  const ids = Object.keys(c).sort((x, y) => TYPE_ORDER.indexOf(VARS[x].cls) - TYPE_ORDER.indexOf(VARS[y].cls)); let h = '', k = 0;
+  for (const id of ids) for (let i = 0; i < c[id]; i++, k++) h += '<button class="slot" data-v="' + id + '"><img src="' + iconURL(VARS[id].cls, side) + '" alt=""><span>' + VARS[id].name + '</span></button>';
+  for (; k < Math.max(8, Math.ceil(k / 4) * 4); k++) h += '<div class="slot empty"></div>';
+  E.fSlots.innerHTML = h; $('#fGo').disabled = n === 0; $('#fGo').style.opacity = n ? 1 : .4;
+  $('#fBuy').disabled = !UI.shop.sel || VARS[UI.shop.sel].cost > left || n >= MAX_UNITS; $('#fSell').disabled = !c[UI.shop.sel];
+}
+function shopSelect(id, quiet) {
+  UI.shop.sel = id; const v = VARS[id], c = UI.force[side], left = budgetOf(side) - forceCost(c);
+  E.fName.textContent = v.name + (c[id] ? ' × ' + c[id] : ''); E.fDesc.textContent = v.desc + ' · ' + v.hint + ' · стоимость ' + v.cost;
+  $$('.vc', E.fCar).forEach(b => b.classList.toggle('sel', b.dataset.v === id));
+  const el = E.fCar.querySelector('[data-v="' + id + '"]'); if (el && !quiet) el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); else if (el) E.fCar.scrollLeft = el.offsetLeft - (E.fCar.clientWidth - el.offsetWidth) / 2;
+  $('#fBuy').disabled = v.cost > left || forceN(c) >= MAX_UNITS; $('#fSell').disabled = !c[id];
+}
+function shopChange(d) {
+  const id = UI.shop.sel, c = UI.force[side]; if (!id) return; if (d > 0) { if (VARS[id].cost > budgetOf(side) - forceCost(c) || forceN(c) >= MAX_UNITS) return; c[id] = (c[id] || 0) + 1; } else { if (!c[id]) return; c[id]--; if (!c[id]) delete c[id]; }
+  const sc = E.fCar.scrollLeft; renderForce(); E.fCar.scrollLeft = sc;
 }
 HOOK.onOver = o => { clearTimeout(endTimer); endTimer = setTimeout(() => showEnd(o), 1400); };
 function showEnd(o) {
@@ -2275,7 +2375,7 @@ function frame(t) {
 
 /* ---------- запуск ---------- */
 function boot() {
-  ['view', 'mini', 'hud', 'log', 'hint', 'sel', 'cmds', 'cmds2', 'abil', 'force', 'fList', 'fBud', 'fBar', 'fSub', 'fTitle', 'deployBar', 'deck', 'menu', 'end', 'settings', 'perf', 'objs', 'clock', 'pts', 'bPause', 'endRes', 'endWhy', 'endStats', 'artList'].forEach(id => E[id] = document.getElementById(id));
+  ['view', 'mini', 'hud', 'log', 'hint', 'sel', 'cmds', 'cmds2', 'abil', 'force', 'fTabs', 'fCar', 'fName', 'fDesc', 'fSlots', 'fBud', 'fBar', 'fSub', 'fTitle', 'deployMsg', 'deployGo', 'orders', 'sqgrid', 'deck', 'menu', 'end', 'settings', 'perf', 'objs', 'clock', 'pts', 'bPause', 'endRes', 'endWhy', 'endStats', 'artList'].forEach(id => E[id] = document.getElementById(id));
   E.artNote = document.createElement('p'); E.artNote.style.cssText = 'margin:0;font-size:12px;color:var(--ok);min-height:16px'; E.artList.after(E.artNote);
   cv = E.view; ctx = cv.getContext('2d'); mini = E.mini; mctx = mini.getContext('2d'); E.bPause.innerHTML = IC.pause;
   genMap(); buildTerrain(); resizeView(); bindInput(); renderArtList(); cam.z = .45; loadPack().then(studioRestore);
@@ -2289,12 +2389,17 @@ function boot() {
   $('#swSnd').onclick = e => { SND.on = !SND.on; e.currentTarget.classList.toggle('on', SND.on); }; $('#swPerf').onclick = e => { UI.perf = !UI.perf; e.currentTarget.classList.toggle('on', UI.perf); E.perf.hidden = !UI.perf; };
   $('#bStress').onclick = () => { if (!S) { alert_('Сначала начните бой'); return; } E.settings.hidden = true; stress(120); UI.perf = true; E.perf.hidden = false; $('#swPerf').classList.add('on'); };
   $('#artFile').onchange = e => { studioOpen([...e.target.files]); e.target.value = ''; }; $('#bArtReset').onclick = artResetAll; E.artList.onclick = e => { const k = e.target.dataset && e.target.dataset.rm; if (k) artRemove(k); };
-  E.fList.onclick = e => { const b = e.target.closest('[data-f]'); if (!b || b.disabled) return; const c = UI.force[side], id = b.dataset.f, d = +b.dataset.d; c[id] = Math.max(0, (c[id] || 0) + d); if (!c[id]) delete c[id]; const sc = E.fList.scrollTop; renderForce(); E.fList.scrollTop = sc; };
+  E.fTabs.onclick = e => { const b = e.target.closest('[data-tab]'); if (!b) return; UI.shop.tab = +b.dataset.tab; renderForce(); };
+  E.fCar.onclick = e => { const b = e.target.closest('[data-v]'); if (b) shopSelect(b.dataset.v); };
+  let carT = 0; E.fCar.addEventListener('scroll', () => { clearTimeout(carT); carT = setTimeout(() => { const mid = E.fCar.scrollLeft + E.fCar.clientWidth / 2; let best = null, bd = 1e9; for (const el of E.fCar.children) { const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = el; } } if (best && best.dataset.v !== UI.shop.sel) shopSelect(best.dataset.v, true); }, 90); });
+  E.fSlots.onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; const cls = VARS[b.dataset.v].cls; UI.shop.tab = Math.max(0, SHOP_TABS.findIndex(t => t[1].includes(cls))); UI.shop.sel = b.dataset.v; renderForce(); };
+  $('#fBuy').onclick = () => shopChange(1); $('#fSell').onclick = () => shopChange(-1);
   $('#fAuto').onclick = () => { UI.force[side] = presetCounts(side); renderForce(); }; $('#fClear').onclick = () => { UI.force[side] = {}; renderForce(); };
-  $('#fGo').onclick = () => { if (forceN(UI.force[side])) startBattle(); }; $('#fBack').onclick = () => { E.force.hidden = true; E.menu.hidden = false; }; $('#deployGo').onclick = beginBattle;
+  $('#fGo').onclick = () => { if (forceN(UI.force[side])) startBattle(); }; $('#fBack').onclick = () => { E.force.hidden = true; E.menu.hidden = false; }; E.deployGo.onclick = beginBattle; $('#bDeck').onclick = toggleDeck; E.sqgrid.onclick = e => { const b = e.target.closest('[data-sq]'); if (b && S) sqTap(+b.dataset.sq); };
   E.cmds.onclick = e => { const b = e.target.closest('[data-cmd]'); if (b && !b.disabled) commandBtn(b.dataset.cmd); };
   E.abil.onclick = e => { const b = e.target.closest('[data-ab]'); if (b) abilityBtn(b.dataset.ab); };
-  E.sel.onclick = e => { const a = e.target.closest('[data-act]'); if (!a) return; if (a.dataset.act === 'all') selectAll(); else if (a.dataset.act === 'clear') selectOnly(null); else if (a.dataset.act === 'more') E.sel.classList.toggle('open'); };
+  E.sel.onclick = e => { const a = e.target.closest('[data-act]'); if (!a) return; if (a.dataset.act === 'all') selectAll(); else if (a.dataset.act === 'clear') selectOnly(null); else if (a.dataset.act === 'more') E.sel.classList.toggle('open'); else return; };
+  E.sel.addEventListener('click', e => { const b = e.target.closest('[data-cmd]'); if (b) commandBtn(b.dataset.cmd); });
   E.deck.onclick = e => { if (e.target.closest('[data-close]')) { E.deck.hidden = true; return; } const b = e.target.closest('[data-buy]'); if (b && S) { if (buyUnit(S.player, b.dataset.buy)) { deckSig = ''; renderDeck(); } } };
   requestAnimationFrame(frame);
   window.__game = { get S() { return S; }, newBattle, step, startBattle, stress, issue, selectAll, cam, UI, perf, setSide: v => side = v, aiTick, genMap, ZONE, VIEW, w2s: (x, y) => [(x - cam.x) * cam.z + VIEW.w / 2, (y - cam.y) * cam.z + VIEW.h / 2] };

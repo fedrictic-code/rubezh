@@ -26,7 +26,7 @@ HOOK.log = (text, kind, x, y) => {
 };
 function toast(msg, ms = 2600) { E.hint.textContent = msg; E.hint.hidden = false; E.hint._mode = false; hintT = performance.now() + ms; }
 function setMode(m) {
-  UI.mode = m; $$('.cmd', E.cmds).forEach(b => b.classList.toggle('on', b.dataset.cmd === m));
+  UI.mode = m; $$('.cmd', E.orders).forEach(b => b.classList.toggle('on', b.dataset.cmd === m));
   $$('.ab', E.abil).forEach(b => b.classList.toggle('on', b.dataset.ab === m));
   const TX = { sneak: 'Коснитесь точки: отряды двинутся скрытно, медленно и тихо', mount: 'Коснитесь своего БМП или БТР, чтобы пехота села на технику', arty: 'Коснитесь точки для артиллерийского удара. С наблюдателем точнее', fight: 'Коснитесь точки: отряды пойдут туда и вступят в бой', fire: 'Коснитесь цели для миномёта. Без наблюдателя огонь неточный', drone: 'Коснитесь точки разведки', smoke: 'Коснитесь точки для дымовой завесы', fpv: 'Коснитесь видимого противника' };
   if (m) { toast(TX[m], 600000); E.hint._mode = true; } else if (E.hint._mode) { E.hint.hidden = true; E.hint._mode = false; }
@@ -163,29 +163,50 @@ function statusOf(q) {
   if (o) { if (o.kind === 'move') return 'Движется'; if (o.kind === 'fight') return 'Атака <s>· идёт в бой</s>'; if (o.kind === 'attack') return 'Сближается с целью'; if (o.kind === 'hold') return q.fort > .9 ? 'Окопался <s>· защита повышена</s>' : 'Окапывается'; if (o.kind === 'retreat') return 'Отход'; if (o.kind === 'fire') return 'Миномётный огонь'; }
   return q.fort > .9 ? 'Окопался' : 'Ожидает приказа';
 }
+function sqTap(no) {
+  const q = S.squads.find(s => s.side === S.player && s.no === no && !s.dead && !s.carried); if (!q) return;
+  if (UI.multi || gestShift) { S.sel.has(q.id) ? S.sel.delete(q.id) : S.sel.add(q.id); onSel(); return; }
+  if (S.sel.size === 1 && S.sel.has(q.id)) { cam.x = q.x; cam.y = q.y; clampCam(); return; }
+  selectOnly(q);
+}
+function renderSqGrid() {
+  const mine = {}; for (const q of S.squads) if (q.side === S.player && !q.dead && q.no) mine[q.no] = q;
+  let sg = ''; for (let i = 1; i <= 16; i++) { const q = mine[i]; sg += i + (q ? ':' + (S.sel.has(q.id) ? 1 : 0) + (q.carried ? 'c' : '') + (q.rout ? 'r' : '') + (q.supp >= 75 ? 's' : '') + (q.t.veh ? 'v' : '') + (q.t.mortar ? 'm' : '') + (q.morale > 60 ? 3 : q.morale > 35 ? 2 : 1) : '') + ','; }
+  if (sg === E.sqgrid._s) return; E.sqgrid._s = sg;
+  let h = ''; for (let i = 1; i <= 16; i++) { const q = mine[i]; h += q ? '<button data-sq="' + i + '" class="sq' + (S.sel.has(q.id) ? ' on' : '') + (q.rout ? ' rout' : q.supp >= 75 ? ' supp' : '') + (q.carried ? ' carried' : '') + '" aria-label="' + q.name + '"><b>' + i + '</b><u class="m' + (q.morale > 60 ? 3 : q.morale > 35 ? 2 : 1) + '"></u><i>' + (q.t.veh ? '▬' : q.t.mortar ? '◔' : '') + '</i></button>' : '<button class="sq no" disabled><b>' + i + '</b></button>'; }
+  E.sqgrid.innerHTML = h;
+}
 function renderSel() {
   const sel = selSquads(); let h = '', sg = '';
-  if (!sel.length) { sg = 'e'; h = '<div class="empty">Коснитесь отряда на карте, чтобы выбрать его.<button class="lnk" data-act="all">Выбрать все отряды</button></div>'; }
+  if (!sel.length) { sg = 'e'; h = '<div class="empty">Выберите отряд на карте или по номеру слева.<button class="lnk" data-act="all">Выбрать все</button></div>'; }
   else if (sel.length === 1) {
-    const q = sel[0], n = [q.t.name, q.t.desc]; let pips = ''; if (q.t.veh) pips = '<div style="flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden"><u style="display:block;height:100%;width:' + (q.hp / q.hpMax * 100).toFixed(0) + '%;background:' + mcol(q.hp / q.hpMax * 100) + '"></u></div><em>' + Math.ceil(q.hp) + ' / ' + q.hpMax + '</em>'; else { for (let i = 0; i < q.max; i++) pips += '<i class="' + (i < q.men ? '' : 'd') + '"></i>'; pips += '<em>' + q.men + ' из ' + q.max + '</em>'; }
-    sg = [q.id, q.men, Math.ceil(q.hp), q.morale | 0, q.supp | 0, q.ammo | 0, q.order && q.order.kind, q.rout, q.fort > .9, q.tg && q.tg.id, q.crew.reduce((s, m2) => s + m2.ws.reduce((t2, w2) => t2 + Object.values(w2.am).reduce((x, y) => x + y, 0), 0), 0)].join(',');
-    h = '<div class="row"><img class="ico" src="' + iconURL(q.type, q.side) + '" alt=""><div class="meta" data-act="more"><b>' + q.name + '<small>' + n[0] + '</small></b><span>' + statusOf(q) + '</span></div><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div><div class="men">' + pips + '</div><div class="bars">' + bar('Стойкость', q.morale, mcol(q.morale)) + bar('Подавление', q.supp, 'var(--warn)') + bar('Боезапас', q.ammo, 'var(--mut)') + '</div><div class="load">' + loadoutOf(q).map(e => '<span>' + e.n + (e.c > 1 ? ' ×' + e.c : '') + ' <b>' + (e.k === 'rifle' || e.k === 'mg' || e.k === 'hmg' ? '' : Object.keys(e.ammo).map(k => AMMO[k].n + ' ' + e.ammo[k]).join(', ')) + '</b></span>').join('') + '</div>';
+    const q = sel[0], L = loadoutOf(q), main = L[0]; let pips = '';
+    if (q.t.veh) pips = '<div class="hpb"><u style="width:' + (q.hp / q.hpMax * 100).toFixed(0) + '%;background:' + mcol(q.hp / q.hpMax * 100) + '"></u></div><em>' + Math.ceil(q.hp) + '%</em>'; else { for (let i = 0; i < q.max; i++) pips += '<i class="' + (i < q.men ? '' : 'd') + '"></i>'; }
+    const rounds = main ? Object.values(main.ammo).reduce((x, y) => x + y, 0) : 0, am = main && main.ammo ? Object.keys(main.ammo)[0] : '';
+    sg = [q.id, q.men, Math.ceil(q.hp), q.morale | 0, q.supp | 0, q.ammo | 0, q.order && q.order.kind, q.rout, q.fort > .9, q.tg && q.tg.id, q.stance, q.sneak, rounds].join(',');
+    h = '<div class="in-top"><b>' + q.name + '</b><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div>'
+      + '<div class="in-btns"><button data-cmd="cease" class="' + (q.stance === 'cease' ? 'on' : '') + '">' + (q.stance === 'cease' ? 'Не стрелять' : 'Огонь по готовн.') + '</button><button data-cmd="ambush" class="' + (q.stance === 'ambush' ? 'on' : '') + '">Засада</button></div>'
+      + '<div class="in-mid"><img src="' + iconURL(q.type, q.side) + '" alt=""><div><div class="men">' + pips + '</div><div class="st">' + statusOf(q) + '</div></div></div>'
+      + '<div class="in-wp" data-act="more"><span>' + (main ? main.n + (main.c > 1 ? ' ×' + main.c : '') : q.t.name) + '</span><b>' + (main && rounds ? '▮ ×' + rounds : '') + '</b></div>'
+      + '<div class="bars">' + bar('Стойк.', q.morale, mcol(q.morale)) + bar('Подавл.', q.supp, 'var(--warn)') + bar('Боезап.', q.ammo, 'var(--mut)') + '</div>'
+      + '<div class="load">' + L.map(e => '<span>' + e.n + (e.c > 1 ? ' ×' + e.c : '') + ' <b>' + (e.k === 'rifle' || e.k === 'mg' || e.k === 'hmg' ? '' : Object.keys(e.ammo).map(k => AMMO[k].n + ' ' + e.ammo[k]).join(', ')) + '</b></span>').join('') + '</div>';
   } else {
     sg = 'm' + sel.map(q => q.id + ':' + q.men + ':' + (q.rout ? 1 : 0)).join(',');
-    h = '<div class="row"><div class="meta"><b>Выбрано отрядов: ' + sel.length + '</b><span>' + (UI.multi ? 'Режим добавления включён' : 'Приказ получат все') + '</span></div><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div><div class="chips">' + sel.map(q => '<span class="chip"><img src="' + iconURL(q.type, q.side) + '" alt="">' + q.name + ' · ' + (q.t.veh ? Math.ceil(q.hp / q.hpMax * 100) + '%' : q.men) + '</span>').join('') + '</div>';
+    h = '<div class="in-top"><b>Выбрано: ' + sel.length + '</b><button class="x" data-act="clear" aria-label="Снять выбор">×</button></div><div class="in-note">' + (UI.multi ? 'Режим добавления включён' : 'Приказ получат все') + '</div><div class="chips">' + sel.map(q => '<span class="chip">' + q.no + ' ' + q.name + ' · ' + (q.t.veh ? Math.ceil(q.hp / q.hpMax * 100) + '%' : q.men) + '</span>').join('') + '</div>';
   }
-  const full = sg + '|' + (UI.multi ? 1 : 0); if (full === selSig) return; selSig = full; E.sel.innerHTML = h + (sel.length === 0 ? '' : '');
+  const full = sg + '|' + (UI.multi ? 1 : 0); if (full !== selSig) { selSig = full; E.sel.innerHTML = h; }
+  E.orders.hidden = !sel.length || !!(S && S.deploying);
   E.cmds.querySelector('[data-cmd="fire"]').hidden = !sel.some(q => q.t.mortar);
-  E.cmds2.hidden = !sel.length; if (sel.length) { const cm = k => E.cmds2.querySelector('[data-cmd="' + k + '"]'); cm('ambush').classList.toggle('on', sel.every(q => q.stance === 'ambush')); cm('cease').classList.toggle('on', sel.every(q => q.stance === 'cease')); cm('sneak').hidden = sel.every(q => q.t.veh); cm('mount').hidden = sel.every(q => q.t.veh); cm('dismount').hidden = !sel.some(q => q.cargo); }
+  E.cmds2.hidden = !sel.length; if (sel.length) { const cm = k => E.cmds2.querySelector('[data-cmd="' + k + '"]'); cm('sneak').hidden = sel.every(q => q.t.veh); cm('mount').hidden = sel.every(q => q.t.veh); cm('dismount').hidden = !sel.some(q => q.cargo); }
 }
 function renderHud(now) {
   if (!S) return; const left = LIMIT - S.t;
   E.clock.firstChild.nodeValue = fmtTime(left);
-  const inc = S.inc[S.player]; E.pts.innerHTML = '◆ ' + Math.floor(S.pts[S.player]) + '<small>+' + inc.toFixed(1) + '/с</small>';
+  const inc = S.inc[S.player]; E.pts.innerHTML = '◆ ' + Math.floor(S.pts[S.player]) + '<small>+' + inc.toFixed(1) + '/с</small>'; $('#bDeck').classList.toggle('on', !E.deck.hidden);
   let h = ''; for (const o of S.objs) { const own = o.owner >= 0 ? SIDES[o.owner].short : 'нейтрально'; const hold = o.key && S.holdT > 0 && S.objs.filter(x => x.key).every(x => x.owner === S.atk); h += '<div class="obj glass' + (hold ? ' hold' : '') + '"><b><span>' + o.name + '</span><i>' + (o.contested ? 'бой' : own) + '</i></b><div class="bar"><u style="width:' + ((1 - o.ctrl) * 50) + '%"></u><u style="width:' + ((1 + o.ctrl) * 50) + '%"></u></div></div>'; }
   if (S.holdT > 0) h += '<div class="obj glass hold"><b><span>Удержание</span><i>' + (S.atk === S.player ? 'цель' : 'угроза') + '</i></b><div class="bar" style="background:rgba(255,255,255,.1)"><u style="width:' + (S.holdT / HOLD_NEED * 100) + '%;background:var(--amber)"></u></div></div>';
   if (h !== E.objs._h) { E.objs.innerHTML = h; E.objs._h = h; }
-  renderSel(); renderDeck();
+  renderSel(); renderSqGrid(); renderDeck();
   $$('.ab', E.abil).forEach(b => { const a = S.ab[S.player][b.dataset.ab]; b.querySelector('em').textContent = '×' + a.ch; b.querySelector('u').style.height = a.cd > 0 ? (a.cd / AB_CD[b.dataset.ab] * 100) + '%' : '0'; b.classList.toggle('off', a.ch <= 0); b.querySelector('span').textContent = { drone: 'Q', fpv: 'Z', smoke: 'E', arty: 'T' }[b.dataset.ab]; });
   $$('.cmd', E.cmds).forEach(b => { if (b.dataset.cmd === 'deck') b.classList.toggle('on', !E.deck.hidden); });
   if (!E.hint.hidden && now > hintT) E.hint.hidden = true;
@@ -196,12 +217,12 @@ function renderHud(now) {
 /* ---------- старт, финиш ---------- */
 function startBattle() {
   sndInit(); const fc = [null, null]; fc[side] = forceList(side); newBattle(side, diff, fc); buildTerrain(); fogCv = null; fogBig = null; paused = false; E.bPause.innerHTML = IC.pause; setSpeed(1); UI.mode = null; UI.menu = false; UI.pings.length = 0; selSig = ''; deckSig = ''; E.deck.hidden = true; E.log.innerHTML = '';
-  E.menu.hidden = true; E.force.hidden = true; E.end.hidden = true; E.hud.hidden = false; setMode(null); S.deploying = true; paused = true; E.hud.classList.add('deploying'); E.deployBar.hidden = false;
+  E.menu.hidden = true; E.force.hidden = true; E.end.hidden = true; E.hud.hidden = false; setMode(null); S.deploying = true; paused = true; E.hud.classList.add('deploying'); E.deployMsg.hidden = false; E.deployGo.hidden = false;
   cam.z = clamp(VIEW.w / 1500, .38, .85); cam.x = side === 0 ? 1740 : 330; cam.y = 740; clampCam(); acc = 0;
   if (false) toast(side === S.atk ? 'Возьмите село Дубки и высоту 112 и держите их ' + HOLD_NEED + ' с. Выберите отряд и коснитесь карты.' : 'Продержитесь ' + (LIMIT / 60) + ' минут. Не отдавайте село Дубки и высоту 112.', 6000);
 }
 function beginBattle() {
-  if (!S || !S.deploying) return; S.deploying = false; paused = false; E.hud.classList.remove('deploying'); E.deployBar.hidden = true; S.sel.clear(); selSig = '';
+  if (!S || !S.deploying) return; S.deploying = false; paused = false; E.hud.classList.remove('deploying'); E.deployMsg.hidden = true; E.deployGo.hidden = true; S.sel.clear(); selSig = '';
   toast(side === S.atk ? 'Возьмите село Дубки и высоту 112 и держите их ' + HOLD_NEED + ' с. Выберите отряд и коснитесь карты.' : 'Продержитесь ' + (LIMIT / 60) + ' минут. Не отдавайте село Дубки и высоту 112.', 6000);
 }
 function deployTap(wx, wy, hit) {
@@ -222,16 +243,33 @@ function openForce() {
   if (!Object.keys(UI.force[side]).length) UI.force[side] = presetCounts(side);
   E.menu.hidden = true; E.force.hidden = false; renderForce();
 }
+const SHOP_TABS = [['Техника', ['ifv', 'tank']], ['Пехота', ['rifle', 'mg', 'sniper']], ['ПТ орудия', ['at']], ['Поддержка', ['mortar']]];
+UI.shop = { tab: 0, sel: null };
+function shopList() { return variantsFor(side).filter(v => SHOP_TABS[UI.shop.tab][1].includes(v.cls)); }
 function renderForce() {
   const c = UI.force[side], budget = budgetOf(side), used = forceCost(c), n = forceN(c), left = budget - used;
-  E.fTitle.textContent = 'Подбор сил · ' + SIDES[side].name; E.fSub.textContent = (side === 1 ? 'Наступление' : 'Оборона') + ' · отрядов ' + n + ' из ' + MAX_UNITS;
-  E.fBud.textContent = used + ' / ' + budget; E.fBar.style.width = Math.min(100, used / budget * 100) + '%';
-  let h = ''; const names = { rifle: 'Пехота', mg: 'Пулемёты', at: 'Противотанковые', sniper: 'Снайперы', mortar: 'Миномёты', ifv: 'Боевые машины', tank: 'Танки' };
-  for (const k of TYPE_ORDER) {
-    const vs = variantsFor(side).filter(v => v.cls === k); if (!vs.length) continue; h += '<h4>' + names[k] + '</h4>';
-    for (const v of vs) { const q = c[v.id] || 0; h += '<div class="fr"><img src="' + iconURL(v.cls, side) + '" alt=""><b>' + v.name + '</b><span class="c">◆ ' + v.cost + '</span><div class="st"><button data-f="' + v.id + '" data-d="-1"' + (q ? '' : ' disabled') + ' aria-label="Убрать">−</button><i>' + q + '</i><button data-f="' + v.id + '" data-d="1"' + (v.cost > left || n >= MAX_UNITS ? ' disabled' : '') + ' aria-label="Добавить">+</button></div><p>' + v.desc + ' · ' + v.hint + '</p></div>'; }
-  }
-  E.fList.innerHTML = h; $('#fGo').disabled = n === 0; $('#fGo').style.opacity = n ? 1 : .4;
+  E.fTitle.textContent = SIDES[side].name; E.fSub.textContent = (side === 1 ? 'Наступление' : 'Оборона') + ' · отрядов ' + n + ' из ' + MAX_UNITS;
+  E.fBud.textContent = left + ' из ' + budget; E.fBar.style.width = Math.min(100, used / budget * 100) + '%';
+  E.fTabs.innerHTML = SHOP_TABS.map((t, i) => '<button data-tab="' + i + '" class="' + (i === UI.shop.tab ? 'on' : '') + '">' + t[0] + '</button>').join('');
+  const list = shopList(); if (!list.length) { E.fCar.innerHTML = ''; return; } if (!list.some(v => v.id === UI.shop.sel)) UI.shop.sel = list[0].id;
+  E.fCar.innerHTML = list.map(v => '<button class="vc' + (v.id === UI.shop.sel ? ' sel' : '') + (v.cost > left ? ' poor' : '') + '" data-v="' + v.id + '"><span class="nm">' + v.name + '</span><img src="' + iconURL(v.cls, side) + '" alt=""><span class="ct">◆ ' + v.cost + '</span>' + (c[v.id] ? '<i>' + c[v.id] + '</i>' : '') + '</button>').join('');
+  shopSelect(UI.shop.sel, true);
+  const ids = Object.keys(c).sort((x, y) => TYPE_ORDER.indexOf(VARS[x].cls) - TYPE_ORDER.indexOf(VARS[y].cls)); let h = '', k = 0;
+  for (const id of ids) for (let i = 0; i < c[id]; i++, k++) h += '<button class="slot" data-v="' + id + '"><img src="' + iconURL(VARS[id].cls, side) + '" alt=""><span>' + VARS[id].name + '</span></button>';
+  for (; k < Math.max(8, Math.ceil(k / 4) * 4); k++) h += '<div class="slot empty"></div>';
+  E.fSlots.innerHTML = h; $('#fGo').disabled = n === 0; $('#fGo').style.opacity = n ? 1 : .4;
+  $('#fBuy').disabled = !UI.shop.sel || VARS[UI.shop.sel].cost > left || n >= MAX_UNITS; $('#fSell').disabled = !c[UI.shop.sel];
+}
+function shopSelect(id, quiet) {
+  UI.shop.sel = id; const v = VARS[id], c = UI.force[side], left = budgetOf(side) - forceCost(c);
+  E.fName.textContent = v.name + (c[id] ? ' × ' + c[id] : ''); E.fDesc.textContent = v.desc + ' · ' + v.hint + ' · стоимость ' + v.cost;
+  $$('.vc', E.fCar).forEach(b => b.classList.toggle('sel', b.dataset.v === id));
+  const el = E.fCar.querySelector('[data-v="' + id + '"]'); if (el && !quiet) el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); else if (el) E.fCar.scrollLeft = el.offsetLeft - (E.fCar.clientWidth - el.offsetWidth) / 2;
+  $('#fBuy').disabled = v.cost > left || forceN(c) >= MAX_UNITS; $('#fSell').disabled = !c[id];
+}
+function shopChange(d) {
+  const id = UI.shop.sel, c = UI.force[side]; if (!id) return; if (d > 0) { if (VARS[id].cost > budgetOf(side) - forceCost(c) || forceN(c) >= MAX_UNITS) return; c[id] = (c[id] || 0) + 1; } else { if (!c[id]) return; c[id]--; if (!c[id]) delete c[id]; }
+  const sc = E.fCar.scrollLeft; renderForce(); E.fCar.scrollLeft = sc;
 }
 HOOK.onOver = o => { clearTimeout(endTimer); endTimer = setTimeout(() => showEnd(o), 1400); };
 function showEnd(o) {
@@ -278,7 +316,7 @@ function frame(t) {
 
 /* ---------- запуск ---------- */
 function boot() {
-  ['view', 'mini', 'hud', 'log', 'hint', 'sel', 'cmds', 'cmds2', 'abil', 'force', 'fList', 'fBud', 'fBar', 'fSub', 'fTitle', 'deployBar', 'deck', 'menu', 'end', 'settings', 'perf', 'objs', 'clock', 'pts', 'bPause', 'endRes', 'endWhy', 'endStats', 'artList'].forEach(id => E[id] = document.getElementById(id));
+  ['view', 'mini', 'hud', 'log', 'hint', 'sel', 'cmds', 'cmds2', 'abil', 'force', 'fTabs', 'fCar', 'fName', 'fDesc', 'fSlots', 'fBud', 'fBar', 'fSub', 'fTitle', 'deployMsg', 'deployGo', 'orders', 'sqgrid', 'deck', 'menu', 'end', 'settings', 'perf', 'objs', 'clock', 'pts', 'bPause', 'endRes', 'endWhy', 'endStats', 'artList'].forEach(id => E[id] = document.getElementById(id));
   E.artNote = document.createElement('p'); E.artNote.style.cssText = 'margin:0;font-size:12px;color:var(--ok);min-height:16px'; E.artList.after(E.artNote);
   cv = E.view; ctx = cv.getContext('2d'); mini = E.mini; mctx = mini.getContext('2d'); E.bPause.innerHTML = IC.pause;
   genMap(); buildTerrain(); resizeView(); bindInput(); renderArtList(); cam.z = .45; loadPack().then(studioRestore);
@@ -292,12 +330,17 @@ function boot() {
   $('#swSnd').onclick = e => { SND.on = !SND.on; e.currentTarget.classList.toggle('on', SND.on); }; $('#swPerf').onclick = e => { UI.perf = !UI.perf; e.currentTarget.classList.toggle('on', UI.perf); E.perf.hidden = !UI.perf; };
   $('#bStress').onclick = () => { if (!S) { alert_('Сначала начните бой'); return; } E.settings.hidden = true; stress(120); UI.perf = true; E.perf.hidden = false; $('#swPerf').classList.add('on'); };
   $('#artFile').onchange = e => { studioOpen([...e.target.files]); e.target.value = ''; }; $('#bArtReset').onclick = artResetAll; E.artList.onclick = e => { const k = e.target.dataset && e.target.dataset.rm; if (k) artRemove(k); };
-  E.fList.onclick = e => { const b = e.target.closest('[data-f]'); if (!b || b.disabled) return; const c = UI.force[side], id = b.dataset.f, d = +b.dataset.d; c[id] = Math.max(0, (c[id] || 0) + d); if (!c[id]) delete c[id]; const sc = E.fList.scrollTop; renderForce(); E.fList.scrollTop = sc; };
+  E.fTabs.onclick = e => { const b = e.target.closest('[data-tab]'); if (!b) return; UI.shop.tab = +b.dataset.tab; renderForce(); };
+  E.fCar.onclick = e => { const b = e.target.closest('[data-v]'); if (b) shopSelect(b.dataset.v); };
+  let carT = 0; E.fCar.addEventListener('scroll', () => { clearTimeout(carT); carT = setTimeout(() => { const mid = E.fCar.scrollLeft + E.fCar.clientWidth / 2; let best = null, bd = 1e9; for (const el of E.fCar.children) { const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = el; } } if (best && best.dataset.v !== UI.shop.sel) shopSelect(best.dataset.v, true); }, 90); });
+  E.fSlots.onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; const cls = VARS[b.dataset.v].cls; UI.shop.tab = Math.max(0, SHOP_TABS.findIndex(t => t[1].includes(cls))); UI.shop.sel = b.dataset.v; renderForce(); };
+  $('#fBuy').onclick = () => shopChange(1); $('#fSell').onclick = () => shopChange(-1);
   $('#fAuto').onclick = () => { UI.force[side] = presetCounts(side); renderForce(); }; $('#fClear').onclick = () => { UI.force[side] = {}; renderForce(); };
-  $('#fGo').onclick = () => { if (forceN(UI.force[side])) startBattle(); }; $('#fBack').onclick = () => { E.force.hidden = true; E.menu.hidden = false; }; $('#deployGo').onclick = beginBattle;
+  $('#fGo').onclick = () => { if (forceN(UI.force[side])) startBattle(); }; $('#fBack').onclick = () => { E.force.hidden = true; E.menu.hidden = false; }; E.deployGo.onclick = beginBattle; $('#bDeck').onclick = toggleDeck; E.sqgrid.onclick = e => { const b = e.target.closest('[data-sq]'); if (b && S) sqTap(+b.dataset.sq); };
   E.cmds.onclick = e => { const b = e.target.closest('[data-cmd]'); if (b && !b.disabled) commandBtn(b.dataset.cmd); };
   E.abil.onclick = e => { const b = e.target.closest('[data-ab]'); if (b) abilityBtn(b.dataset.ab); };
-  E.sel.onclick = e => { const a = e.target.closest('[data-act]'); if (!a) return; if (a.dataset.act === 'all') selectAll(); else if (a.dataset.act === 'clear') selectOnly(null); else if (a.dataset.act === 'more') E.sel.classList.toggle('open'); };
+  E.sel.onclick = e => { const a = e.target.closest('[data-act]'); if (!a) return; if (a.dataset.act === 'all') selectAll(); else if (a.dataset.act === 'clear') selectOnly(null); else if (a.dataset.act === 'more') E.sel.classList.toggle('open'); else return; };
+  E.sel.addEventListener('click', e => { const b = e.target.closest('[data-cmd]'); if (b) commandBtn(b.dataset.cmd); });
   E.deck.onclick = e => { if (e.target.closest('[data-close]')) { E.deck.hidden = true; return; } const b = e.target.closest('[data-buy]'); if (b && S) { if (buyUnit(S.player, b.dataset.buy)) { deckSig = ''; renderDeck(); } } };
   requestAnimationFrame(frame);
   window.__game = { get S() { return S; }, newBattle, step, startBattle, stress, issue, selectAll, cam, UI, perf, setSide: v => side = v, aiTick, genMap, ZONE, VIEW, w2s: (x, y) => [(x - cam.x) * cam.z + VIEW.w / 2, (y - cam.y) * cam.z + VIEW.h / 2] };

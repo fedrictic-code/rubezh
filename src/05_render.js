@@ -85,6 +85,7 @@ function drawPlates(g, sq, enemy, sel) {
   g.fillStyle = c.dark; g.globalAlpha = .94; g.beginPath(); g.roundRect(px, py, 30, 15, 4); g.fill(); g.globalAlpha = 1;
   g.strokeStyle = sel ? '#e3b341' : c.color; g.lineWidth = sel ? 2 : 1.4; g.stroke();
   const ic = art('icon_' + sq.type); if (ic) g.drawImage(ic.img, px + 2, py + 1.5, 12, 12); else drawGlyph(g, sq.type, px + 8.5, py + 7.5, 9, '#f1f3f4');
+  if (!enemy && sq.no) { g.fillStyle = sel ? '#e3b341' : '#0c1013'; g.strokeStyle = sel ? '#e3b341' : c.color; g.lineWidth = 1.4; g.beginPath(); g.arc(px - 2, py + 2, 7, 0, TAU); g.fill(); g.stroke(); g.fillStyle = sel ? '#17130a' : '#eef1f3'; g.font = '700 9px "IBM Plex Mono",monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(sq.no + '', px - 2, py + 2.5); }
   if (!enemy) { g.fillStyle = '#eef1f3'; g.font = '600 10px "IBM Plex Mono",monospace'; g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillText(sq.t.veh ? Math.max(1, Math.ceil(sq.hp / sq.hpMax * 100)) + '' : sq.men + '', px + 28, py + 8); }
   if (sq.cargo) { g.fillStyle = '#e3b341'; g.font = '700 9px "IBM Plex Mono",monospace'; g.textAlign = 'left'; g.fillText('+' + (S.byId.get(sq.cargo) ? S.byId.get(sq.cargo).men : ''), px + 2, py - 4); }
   if (!enemy && (sq.stance === 'ambush' || sq.stance === 'cease' || sq.sneak)) { g.fillStyle = '#e3b341'; g.font = '700 9px "IBM Plex Mono",monospace'; g.textAlign = 'right'; g.fillText(sq.stance === 'ambush' ? 'ЗАСАДА' : sq.stance === 'cease' ? 'ТИХО' : 'СКРЫТНО', px + 30, py - 4); }
