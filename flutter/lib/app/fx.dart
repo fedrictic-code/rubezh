@@ -2,6 +2,7 @@
 import 'dart:math' as math;
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 
 import '../game/core.dart';
@@ -67,7 +68,7 @@ class Fx {
 
   /// 0 — щелчок выбора, 1 — лёгкий удар, 2 — средний.
   static void haptic(int k) {
-    if (!APP.haptics) return;
+    if (!APP.haptics || kIsWeb) return;
     switch (k) {
       case 0:
         HapticFeedback.selectionClick();
