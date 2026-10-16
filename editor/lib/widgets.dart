@@ -132,19 +132,15 @@ class DropF<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final has = items.any((e) => e.$1 == value);
-    return InputDecorator(
-      decoration: _dec(label).copyWith(contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4)),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          isDense: true,
-          isExpanded: true,
-          value: has ? value : null,
-          items: [for (final e in items) DropdownMenuItem(value: e.$1, child: Text(e.$2, overflow: TextOverflow.ellipsis))],
-          onChanged: (v) {
-            if (v != null) onChanged(v);
-          },
-        ),
-      ),
+    return DropdownButtonFormField<T>(
+      value: has ? value : null,
+      isExpanded: true,
+      isDense: true,
+      decoration: _dec(label),
+      items: [for (final e in items) DropdownMenuItem(value: e.$1, child: Text(e.$2, overflow: TextOverflow.ellipsis))],
+      onChanged: (v) {
+        if (v != null) onChanged(v);
+      },
     );
   }
 }

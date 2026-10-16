@@ -468,9 +468,8 @@ class _MapsPageState extends State<MapsPage> {
         ]),
       Section('Вид', [
         SliderF('Прозрачность разметки', alpha, 0, 1, (v) => setState(() => alpha = v)),
-        Row(children: [
+        Wrap(spacing: 8, runSpacing: 8, children: [
           OutlinedButton.icon(onPressed: busy || m.image == null ? null : reclassify, icon: const Icon(Icons.auto_fix_high, size: 18), label: const Text('Распознать заново')),
-          const SizedBox(width: 8),
           OutlinedButton(onPressed: showSlots ? () => setState(() => showSlots = false) : computeSlots, child: Text(showSlots ? 'Скрыть позиции ИИ' : 'Позиции обороны ИИ')),
         ]),
       ]),
