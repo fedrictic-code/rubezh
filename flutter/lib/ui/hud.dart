@@ -110,7 +110,7 @@ class _TopBar extends StatelessWidget {
     final inc = S.inc[S.player];
     final keys = S.objs.where((o) => o.key);
     final holdAll = keys.every((x) => x.owner == S.atk);
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    final bar = Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Glass(
         r: 10,
         pad: const EdgeInsets.all(2),
@@ -121,22 +121,7 @@ class _TopBar extends StatelessWidget {
           _sp(4),
         ]),
       ),
-      const SizedBox(width: 8),
-      Expanded(
-        child: dep
-            ? const SizedBox.shrink()
-            : Row(children: [
-                for (final o in S.objs)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                      child: _ObjCard(o: o, hold: o.key && S.holdT > 0 && holdAll),
-                    ),
-                  ),
-                if (S.holdT > 0) Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: _HoldCard())),
-              ]),
-      ),
-      const SizedBox(width: 8),
+      const Spacer(),
       Glass(
         r: 10,
         pad: const EdgeInsets.fromLTRB(10, 2, 2, 2),
@@ -154,6 +139,26 @@ class _TopBar extends StatelessWidget {
         ]),
       ),
     ]);
+    if (dep) return bar;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      bar,
+      const SizedBox(height: 5),
+      Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Row(children: [
+            for (final o in S.objs)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                  child: _ObjCard(o: o, hold: o.key && S.holdT > 0 && holdAll),
+                ),
+              ),
+            if (S.holdT > 0) Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 2.5), child: _HoldCard())),
+          ]),
+        ),
+      ),
+    ]);
   }
 }
 
@@ -163,23 +168,24 @@ class _ObjCard extends StatelessWidget {
   const _ObjCard({required this.o, required this.hold});
   @override
   Widget build(BuildContext context) {
-    final own = o.owner >= 0 ? SIDES[o.owner].short : 'нейтрально';
+    final own = o.owner >= 0 ? SIDES[o.owner].short : '—';
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 3, 8, 5),
       decoration: glass(r: 9, border: hold ? C.amber.withValues(alpha: .7) : null),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(children: [
           Expanded(child: Text(o.name.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, style: disp(10))),
-          Text(o.contested ? 'бой' : own, style: body(9, color: C.mut)),
+          Text(o.contested ? 'бой' : own, style: body(9, color: o.contested ? C.warn : (o.owner >= 0 ? C.side(o.owner) : C.mut), w: FontWeight.w700)),
         ]),
         const SizedBox(height: 3),
         Container(
           height: 4,
           decoration: BoxDecoration(color: const Color(0x1AFFFFFF), borderRadius: BorderRadius.circular(2)),
-          child: Stack(children: [
-            Align(alignment: Alignment.centerLeft, child: FractionallySizedBox(widthFactor: ((1 - o.ctrl) / 2).clamp(0.0, 1.0), child: Container(color: C.ua))),
-            Align(alignment: Alignment.centerRight, child: FractionallySizedBox(widthFactor: ((1 + o.ctrl) / 2).clamp(0.0, 1.0), child: Container(color: C.ru))),
-          ]),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: o.ctrl.abs().clamp(0.0, 1.0),
+            child: Container(decoration: BoxDecoration(color: o.ctrl > 0 ? C.ru : C.ua, borderRadius: BorderRadius.circular(2))),
+          ),
         ),
       ]),
     );
