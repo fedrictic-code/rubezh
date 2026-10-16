@@ -3,7 +3,7 @@ import 'package:rubezh/main.dart';
 
 void main() {
   testWidgets('приложение запускается', (tester) async {
-    await tester.pumpWidget(const RubezhApp());
-    expect(find.text('Рубеж'), findsOneWidget);
+    await tester.pumpWidget(const RubezhApp(autoInit: false));
+    expect(find.text('РУБЕЖ'), findsOneWidget);
   });
 }

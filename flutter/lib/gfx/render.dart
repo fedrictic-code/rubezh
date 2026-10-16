@@ -31,6 +31,7 @@ class UiState {
   int hoverId = 0;
   final List<Ping> pings = [];
   bool perf = false;
+  bool menu = true; // на экране меню рисуется только фон
 }
 
 final UiState UI = UiState();
@@ -329,7 +330,23 @@ class WorldPainter extends CustomPainter {
     final g = Ctx2D(canvas);
     g.fillStyle = '#0b0f12';
     g.fillRect(0, 0, size.width, size.height);
-    if (!hasBattle) return;
+    if (UI.menu || !hasBattle) {
+      final tr0 = Assets.terrain;
+      if (tr0 != null) {
+        clampCam();
+        final k0 = tr0.width / W;
+        canvas.save();
+        canvas.translate(View.w / 2 - cam.x * cam.z, View.h / 2 - cam.y * cam.z);
+        canvas.scale(cam.z);
+        final ax0 = clamp(cam.x - View.w / 2 / cam.z, 0, W), ax1 = clamp(cam.x + View.w / 2 / cam.z, 0, W);
+        final ay0 = clamp(cam.y - View.h / 2 / cam.z, 0, H), ay1 = clamp(cam.y + View.h / 2 / cam.z, 0, H);
+        g.image(tr0, ui.Rect.fromLTRB(ax0 * k0, ay0 * k0, ax1 * k0, ay1 * k0), ui.Rect.fromLTRB(ax0, ay0, ax1, ay1));
+        canvas.restore();
+        g.fillStyle = 'rgba(8,12,15,.55)';
+        g.fillRect(0, 0, size.width, size.height);
+      }
+      return;
+    }
     clampCam();
     canvas.save();
     canvas.clipRect(ui.Rect.fromLTWH(0, 0, size.width, size.height));
