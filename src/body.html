@@ -1,0 +1,119 @@
+<div id="app">
+  <canvas id="view" aria-label="Поле боя"></canvas>
+
+  <div id="hud" hidden>
+    <header class="top">
+      <div class="ctl glass">
+        <button class="ib" id="bPause" aria-label="Пауза"></button>
+        <button class="sp on" data-sp="1">1×</button><button class="sp" data-sp="2">2×</button><button class="sp" data-sp="4">4×</button>
+      </div>
+      <div class="objs" id="objs"></div>
+      <div class="right glass">
+        <div class="clock" id="clock">12:00<small>до конца боя</small></div>
+        <div class="pts" id="pts">0</div>
+        <button class="ib" id="bSet" aria-label="Настройки"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      </div>
+    </header>
+
+    <canvas id="mini" width="240" height="150" aria-label="Мини-карта"></canvas>
+    <div id="log" aria-live="polite"></div>
+    <div id="hint" hidden></div>
+
+    <div class="dock">
+      <div id="sel" class="glass"></div>
+      <div class="cmdwrap">
+      <div id="cmds2" hidden>
+        <button class="cmd2" data-cmd="sneak">Скрытно<kbd>C</kbd></button>
+        <button class="cmd2" data-cmd="ambush">Засада<kbd>V</kbd></button>
+        <button class="cmd2" data-cmd="cease">Не стрелять<kbd>X</kbd></button>
+        <button class="cmd2" data-cmd="mount">Посадка<kbd>G</kbd></button>
+        <button class="cmd2" data-cmd="dismount">Высадка<kbd>D</kbd></button>
+      </div>
+      <div id="cmds">
+        <button class="cmd" data-cmd="move"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg>Движение<kbd>M</kbd></button>
+        <button class="cmd" data-cmd="fight"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>Атака<kbd>A</kbd></button>
+        <button class="cmd" data-cmd="hold"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7z"/></svg>Окопаться<kbd>H</kbd></button>
+        <button class="cmd" data-cmd="retreat"><svg viewBox="0 0 24 24"><path d="M20 12H6M11 6l-6 6 6 6"/></svg>Отход<kbd>R</kbd></button>
+        <button class="cmd" data-cmd="fire" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="5"/><path d="M12 9 17 2M3 21h18"/></svg>Огонь<kbd>F</kbd></button>
+        <button class="cmd deck" data-cmd="deck"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Подкрепление<kbd>B</kbd></button>
+      </div>
+      </div>
+      <div id="abil">
+        <button class="ab" data-ab="drone" aria-label="Разведывательный БПЛА"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M5 5l5 5M19 5l-5 5M5 19l5-5M19 19l-5-5"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg><span>Q</span><em></em><u></u></button>
+        <button class="ab" data-ab="fpv" aria-label="FPV-удар"><svg viewBox="0 0 24 24"><path d="M3 12 21 4l-6 17-3-7z"/></svg><span>Z</span><em></em><u></u></button>
+        <button class="ab" data-ab="smoke" aria-label="Дымовая завеса"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-7.9A5.5 5.5 0 0 1 17 8.5a3.7 3.7 0 0 1 .5 7.5z"/><path d="M8 21h8"/></svg><span>E</span><em></em><u></u></button>
+        <button class="ab" data-ab="arty" aria-label="Артиллерия"><svg viewBox="0 0 24 24"><path d="M4 18 14 8l3 3L7 21z"/><path d="M15 7l2-2 3 3-2 2M3 8h4M5 4v4"/></svg><span>T</span><em></em><u></u></button>
+      </div>
+    </div>
+
+    <div id="deployBar" hidden><div><b>Расстановка</b><span>Коснитесь отряда, затем точки в подсвеченной зоне</span></div><button class="go" id="deployGo">Начать бой</button></div>
+    <section id="deck" class="sheet" hidden></section>
+  </div>
+
+  <section id="menu" class="screen">
+    <div class="card">
+      <h1>Ру<span>б</span>еж</h1>
+      <p class="sub">Тактика в реальном времени · прототип 0.1</p>
+      <p class="brief"><b>Переправа у села Дубки.</b> Река делит поле боя. Наступающие должны взять и удержать 40 секунд село Дубки и высоту 112. Обороняющимся нужно продержаться 12 минут. Очки подкрепления приносят захваченные рубежи.</p>
+      <h2>Сторона</h2>
+      <div class="two" id="pickSide">
+        <button class="side on" data-side="0" style="--c:#3d8fe0"><b>Украина</b><span>Оборона · окопы, высота, ПТРК</span></button>
+        <button class="side" data-side="1" style="--c:#d4483f"><b>Россия</b><span>Наступление · броня, миномёт</span></button>
+      </div>
+      <h2>Сложность</h2>
+      <div class="seg" id="pickDiff"><button data-d="easy">Лёгкая</button><button data-d="normal" class="on">Нормальная</button><button data-d="hard">Тяжёлая</button></div>
+      <button class="go" id="bStart">В бой</button>
+      <div class="row2"><button class="ghost" id="bHow">Как играть</button><button class="ghost" id="bSet2">Настройки и графика</button></div>
+      <details id="how"><summary>Управление</summary>
+        <ul>
+          <li><b>Касание.</b> Коснитесь отряда, затем земли: отряд пойдёт туда. Коснитесь видимого врага: сосредоточить огонь. Пальцем тяните карту, двумя пальцами масштабируйте.</li>
+          <li><b>Мышь.</b> Левая кнопка: выбор и рамка. Правая: приказ. Колесо: масштаб. Перетаскивание правой или средней: карта.</li>
+          <li><b>Клавиши.</b> <kbd>Пробел</kbd> пауза, <kbd>M</kbd> <kbd>A</kbd> <kbd>H</kbd> <kbd>R</kbd> <kbd>F</kbd> приказы, <kbd>Q</kbd> <kbd>Z</kbd> <kbd>E</kbd> способности, <kbd>B</kbd> подкрепление, <kbd>Ctrl+A</kbd> все отряды, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> скорость, <kbd>←↑↓→</kbd> карта.</li>
+          <li><b>Бой.</b> Огонь подавляет: прижатая пехота не двигается и стреляет хуже, а потом теряет стойкость и отступает. Лес и здания дают укрытие, но закрывают обзор. Окопавшийся отряд получает защиту.</li>
+          <li><b>Поддержка.</b> Миномёт («Огонь») без наблюдателя бьёт неточно. БПЛА открывает карту, FPV бьёт по видимой цели, дым закрывает обзор.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <section id="force" class="screen" hidden>
+    <div class="card wide">
+      <div class="fhead"><div><h2 id="fTitle" style="margin:0">Подбор сил</h2><p class="sub" id="fSub"></p></div><div class="fbud"><b id="fBud"></b><small>очков</small></div></div>
+      <div class="fbar"><u id="fBar"></u></div>
+      <div id="fList"></div>
+      <div class="row2"><button class="ghost" id="fAuto">Рекомендуемый состав</button><button class="ghost" id="fClear">Очистить</button></div>
+      <button class="go" id="fGo">К расстановке</button>
+      <button class="ghost" id="fBack" style="width:100%;margin-top:8px;flex:none">Назад</button>
+    </div>
+  </section>
+
+  <section id="studio" class="screen" hidden></section>
+
+  <section id="end" class="screen" hidden>
+    <div class="card">
+      <p class="res" id="endRes"></p>
+      <p class="sub" id="endWhy"></p>
+      <div class="stats" id="endStats"></div>
+      <button class="go" id="bAgain">Ещё раз</button>
+      <div class="row2"><button class="ghost" id="bMenu">В меню</button><button class="ghost" id="bWatch">Осмотреть поле боя</button></div>
+    </div>
+  </section>
+
+  <section id="settings" class="screen" hidden>
+    <div class="card">
+      <h2 style="margin-top:0">Настройки</h2>
+      <div class="set">
+        <div class="r"><span>Звук</span><button class="sw on" id="swSnd" aria-label="Звук"></button></div>
+        <div class="r"><span>Счётчик кадров и нагрузки</span><button class="sw" id="swPerf" aria-label="Нагрузка"></button></div>
+        <div class="r"><span>Проверка нагрузки: +120 отрядов, ИИ ведёт обе стороны</span><button class="ghost" id="bStress" style="flex:none;padding:0 14px">Запустить</button></div>
+      </div>
+      <h2>Графика</h2>
+      <p style="margin:0;font-size:12px;color:var(--mut);line-height:1.5">Графика нарисована кодом. Можно загрузить свои картинки (PNG, WebP, JPG): откроется редактор, где можно повернуть, убрать фон, обрезать, выбрать технику или бойца и задать размер. Корпус и башню можно загрузить отдельно, тогда башня вращается сама. Файлы сохраняются в этом браузере.</p>
+      <div class="art" id="artList"></div>
+      <div class="row2"><label class="ghost" style="display:grid;place-items:center;cursor:pointer">Добавить файлы<input type="file" id="artFile" accept="image/*" multiple hidden></label><button class="ghost" id="bArtReset">Сбросить всё</button></div>
+      <button class="go" id="bSetClose" style="height:46px;margin-top:16px">Готово</button>
+    </div>
+  </section>
+
+  <div id="perf" hidden></div>
+</div>
