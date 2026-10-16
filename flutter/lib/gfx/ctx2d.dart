@@ -49,6 +49,9 @@ class Ctx2D {
   ui.StrokeCap cap = ui.StrokeCap.butt;
   ui.StrokeJoin join = ui.StrokeJoin.miter;
   List<double>? dash;
+  /// Ключ кэша пунктирного контура: для неподвижных фигур пунктир строится один раз.
+  String? dashKey;
+  static final Map<String, ui.Path> _dashCache = {};
   ui.Path path = ui.Path();
   bool _hasPt = false;
   final List<_St> _stack = [];
@@ -168,7 +171,19 @@ class Ctx2D {
       ..strokeCap = cap
       ..strokeJoin = join
       ..color = stroke.withValues(alpha: stroke.a * alpha);
-    c.drawPath(dash == null ? path : _dashed(path, dash!), _p);
+    if (dash == null) {
+      c.drawPath(path, _p);
+    } else if (dashKey != null) {
+      final k = '$dashKey|${dash!.join(',')}';
+      var dp = _dashCache[k];
+      if (dp == null) {
+        if (_dashCache.length > 160) _dashCache.clear();
+        dp = _dashCache[k] = _dashed(path, dash!);
+      }
+      c.drawPath(dp, _p);
+    } else {
+      c.drawPath(_dashed(path, dash!), _p);
+    }
   }
 
   void fillRect(double x, double y, double w, double h) {

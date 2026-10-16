@@ -10,6 +10,7 @@ import '../game/core.dart';
 import '../game/data.dart';
 import '../gfx/render.dart';
 import 'fx.dart';
+import 'loop.dart';
 import 'model.dart';
 import 'tutorial.dart';
 
@@ -52,6 +53,12 @@ class GameCtl extends ChangeNotifier {
   final List<int> _owners = [];
 
   void changed() => notifyListeners();
+
+  @override
+  void notifyListeners() {
+    LOOP.poke();
+    super.notifyListeners();
+  }
 
   /* ---------- журнал и подсказки ---------- */
   void addLog(String text, String kind, double x, double y) {

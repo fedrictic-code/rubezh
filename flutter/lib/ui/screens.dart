@@ -452,6 +452,10 @@ class SettingsSheet extends StatelessWidget {
             APP.tutorial = !APP.tutorial;
             APP.changed();
           })),
+          _row('Экономия батареи (30 кадров/с, проще графика)', Toggle(APP.lite, () {
+            APP.lite = !APP.lite;
+            APP.changed();
+          })),
           _row('Счётчик кадров', Toggle(APP.showPerf, () {
             APP.showPerf = !APP.showPerf;
             APP.changed();

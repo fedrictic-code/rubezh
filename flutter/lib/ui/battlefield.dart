@@ -25,6 +25,7 @@ class _BfState extends State<Battlefield> {
   bool get _shift => HardwareKeyboard.instance.isShiftPressed || HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
 
   void _down(PointerDownEvent e) {
+    LOOP.poke();
     if (UI.menu) return;
     CTL.gestShift = _shift;
     final mouse = e.kind == PointerDeviceKind.mouse;
@@ -56,6 +57,7 @@ class _BfState extends State<Battlefield> {
   }
 
   void _move(PointerMoveEvent e) {
+    LOOP.poke();
     final p = P[e.pointer];
     final w = s2w(e.localPosition.dx, e.localPosition.dy);
     UI.ptr = Pt(w.x, w.y);
@@ -95,6 +97,7 @@ class _BfState extends State<Battlefield> {
   }
 
   void _hover(PointerHoverEvent e) {
+    if (UI.mode != null) LOOP.poke();
     final w = s2w(e.localPosition.dx, e.localPosition.dy);
     UI.ptr = Pt(w.x, w.y);
     if (hasBattle && !UI.menu && e.kind == PointerDeviceKind.mouse) {
@@ -104,6 +107,7 @@ class _BfState extends State<Battlefield> {
   }
 
   void _up(PointerEvent e) {
+    LOOP.poke();
     final p = P.remove(e.pointer);
     if (p == null) return;
     if (gMode == 'pinch') {
@@ -133,6 +137,7 @@ class _BfState extends State<Battlefield> {
   }
 
   void _signal(PointerSignalEvent e) {
+    LOOP.poke();
     if (e is PointerScrollEvent && !UI.menu) {
       final bf = s2w(e.localPosition.dx, e.localPosition.dy);
       cam.z *= math.exp(-e.scrollDelta.dy * .0012);

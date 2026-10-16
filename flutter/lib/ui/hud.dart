@@ -55,7 +55,7 @@ class Hud extends StatelessWidget {
             ]),
           ),
           if (CTL.deckOpen) const Positioned(left: 0, right: 0, bottom: 0, child: _DeckSheet()),
-          const CoachLayer(),
+          const RepaintBoundary(child: CoachLayer()),
           if (APP.showPerf)
             Positioned(
               left: 8,
@@ -223,7 +223,7 @@ class _Mini extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onPanDown: (d) => _go(d.localPosition, const Size(w, h)),
         onPanUpdate: (d) => _go(d.localPosition, const Size(w, h)),
-        child: ClipRRect(borderRadius: BorderRadius.circular(7), child: CustomPaint(painter: MiniPainter(LOOP.frame), size: const Size(w, h))),
+        child: RepaintBoundary(child: ClipRRect(borderRadius: BorderRadius.circular(7), child: CustomPaint(painter: MiniPainter(LOOP.hud), size: const Size(w, h)))),
       ),
     );
   }

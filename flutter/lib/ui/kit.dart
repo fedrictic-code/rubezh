@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../app/fx.dart';
+import '../app/loop.dart';
 import 'theme.dart';
 
 /// Обёртка: при касании элемент чуть проседает, лёгкая вибрация.
@@ -40,6 +41,7 @@ class _PressState extends State<Press> {
                 Fx.haptic(0);
               }
               widget.onTap!();
+              LOOP.poke();
             },
       onLongPress: widget.onLongPress == null
           ? null

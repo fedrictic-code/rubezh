@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../game/battle.dart';
 import '../game/data.dart';
+import '../gfx/render.dart';
 
 enum Screen { loading, menu, force, game }
 
@@ -16,6 +17,7 @@ class AppModel extends ChangeNotifier {
   String? shopSel;
   bool sound = true, haptics = true, showPerf = false, settingsOpen = false;
   bool tutorial = true; // обучение в следующем бою
+  bool lite = false; // экономия батареи: 30 кадров/с и упрощённая графика
   SharedPreferences? _prefs;
 
   Future<void> load() async {
@@ -25,6 +27,8 @@ class AppModel extends ChangeNotifier {
       sound = p.getBool('sound') ?? true;
       haptics = p.getBool('haptics') ?? true;
       tutorial = !(p.getBool('tutDone') ?? false);
+      lite = p.getBool('lite') ?? false;
+      UI.lite = lite;
       side = p.getInt('side') ?? 0;
       diff = p.getString('diff') ?? 'normal';
     } catch (_) {}
@@ -36,6 +40,7 @@ class AppModel extends ChangeNotifier {
     p.setBool('sound', sound);
     p.setBool('haptics', haptics);
     p.setBool('tutDone', !tutorial);
+    p.setBool('lite', lite);
     p.setInt('side', side);
     p.setString('diff', diff);
   }
@@ -44,6 +49,7 @@ class AppModel extends ChangeNotifier {
   bool endShown = false;
 
   void changed() {
+    UI.lite = lite;
     save();
     notifyListeners();
   }

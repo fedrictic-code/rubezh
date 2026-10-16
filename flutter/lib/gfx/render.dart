@@ -30,6 +30,7 @@ class UiState {
   int hoverId = 0;
   final List<Ping> pings = [];
   bool perf = false;
+  bool lite = false; // экономный режим графики
   bool menu = true; // на экране меню рисуется только фон
 }
 
@@ -58,7 +59,8 @@ class Assets {
   static ui.Image? fog;
   static bool fogBusy = false;
   static final List<List<double>> craters = [];
-  static const int fogK = 4; // во сколько раз сглаженный туман подробнее сетки
+  static const int fogK = 2; // во сколько раз сглаженный туман подробнее сетки (дальше сглаживает видеокарта)
+  static Uint8List? _fogPrev;
 
   static Future<void> loadTerrain() async {
     terrain = await renderTerrain();
@@ -67,8 +69,24 @@ class Assets {
   /// Туман войны: 0 — не видно, 1 — разведано, 2 — видно сейчас. Плавные края.
   static void fogPaint() {
     if (fogBusy) return;
-    fogBusy = true;
     final f = S.fog;
+    // туман не изменился — картинку не пересчитываем
+    final prev = _fogPrev;
+    if (fog != null && prev != null && prev.length == f.length) {
+      bool same = true;
+      for (int i = 0; i < f.length; i++) {
+        if (prev[i] != f[i]) {
+          same = false;
+          break;
+        }
+      }
+      if (same) {
+        S.fogDirty = false;
+        return;
+      }
+    }
+    _fogPrev = Uint8List.fromList(f);
+    fogBusy = true;
     final w = GW * fogK, h = GH * fogK;
     final px = Uint8List(w * h * 4);
     double val(int x, int y) {
@@ -122,10 +140,12 @@ void drawMen(Ctx2D g, Squad sq) {
     if (!cm.ok) continue;
     final bob = sq.moving ? math.sin(S.t * 9 + i * 1.7) * .7 : 0.0;
     final px = sq.x + cm.dx + bob * sa, py = sq.y + cm.dy - bob * ca;
-    g.fillStyle = 'rgba(0,0,0,.28)';
-    g.beginPath();
-    g.ellipse(px + 1.6, py + 2, rad, rad * .8);
-    g.doFill();
+    if (!UI.lite) {
+      g.fillStyle = 'rgba(0,0,0,.28)';
+      g.beginPath();
+      g.ellipse(px + 1.6, py + 2, rad, rad * .8);
+      g.doFill();
+    }
     cm.kind ??= soldierKind(CrewKind(cm.job, cm.ws.map((w) => w.id).toList()));
     final sp = SpriteCache.soldier(s, cm.kind!);
     if (sp == null) continue;
@@ -168,12 +188,14 @@ void drawVeh(Ctx2D g, double x, double y, double fa, double ta, Variant t, int s
     return;
   }
   final tur = wreck ? fa + .5 : ta;
-  g.save();
-  g.translate(x + 2.6, y + 3.6);
-  g.rotate(fa);
-  g.scale(1.3);
-  g.imageAt(sp.hull, -sp.hw / 2, -sp.hh / 2, sp.hw, sp.hh, filter: _shadowF, opacity: .32);
-  g.restore();
+  if (!UI.lite) {
+    g.save();
+    g.translate(x + 2.6, y + 3.6);
+    g.rotate(fa);
+    g.scale(1.3);
+    g.imageAt(sp.hull, -sp.hw / 2, -sp.hh / 2, sp.hw, sp.hh, filter: _shadowF, opacity: .32);
+    g.restore();
+  }
   g.save();
   g.translate(x, y);
   g.rotate(fa);
@@ -181,10 +203,12 @@ void drawVeh(Ctx2D g, double x, double y, double fa, double ta, Variant t, int s
   g.imageAt(sp.hull, -sp.hw / 2, -sp.hh / 2, sp.hw, sp.hh, filter: wreck ? _deadF : null);
   g.translate(sp.tx, sp.ty);
   g.rotate(tur - fa);
-  g.save();
-  g.translate(2.2, 2.8);
-  g.imageAt(sp.tur.img, -sp.tur.w / 2, -sp.tur.h / 2, sp.tur.w, sp.tur.h, filter: _shadowF, opacity: .28);
-  g.restore();
+  if (!UI.lite) {
+    g.save();
+    g.translate(2.2, 2.8);
+    g.imageAt(sp.tur.img, -sp.tur.w / 2, -sp.tur.h / 2, sp.tur.w, sp.tur.h, filter: _shadowF, opacity: .28);
+    g.restore();
+  }
   g.imageAt(sp.tur.img, -sp.tur.w / 2, -sp.tur.h / 2, sp.tur.w, sp.tur.h, filter: wreck ? _deadT : null);
   g.restore();
 }
@@ -364,10 +388,12 @@ class WorldPainter extends CustomPainter {
     }
     for (final c in Assets.craters) {
       if (c[0] < x0 - 20 || c[0] > x1 + 20 || c[1] < y0 - 20 || c[1] > y1 + 20) continue;
-      g.fillStyle = 'rgba(55,42,28,.55)';
-      g.beginPath();
-      g.ellipse(c[0], c[1], c[2] + 3, c[2] * .8 + 3);
-      g.doFill();
+      if (!UI.lite) {
+        g.fillStyle = 'rgba(55,42,28,.55)';
+        g.beginPath();
+        g.ellipse(c[0], c[1], c[2] + 3, c[2] * .8 + 3);
+        g.doFill();
+      }
       g.fillStyle = '#36291a';
       g.beginPath();
       g.ellipse(c[0], c[1], c[2], c[2] * .78);
@@ -386,6 +412,7 @@ class WorldPainter extends CustomPainter {
       g.arc(o.x, o.y, o.r, 0, TAU);
       g.doFill();
       g.dash = [10, 8];
+      g.dashKey = 'obj${o.id}';
       g.stroke = col;
       g.alpha = .75;
       g.lineWidth = 2 / cam.z * .9 + .6;
@@ -393,6 +420,7 @@ class WorldPainter extends CustomPainter {
       g.arc(o.x, o.y, o.r, 0, TAU);
       g.doStroke();
       g.dash = null;
+      g.dashKey = null;
       g.alpha = 1;
       if (o.ctrl.abs() > .02) {
         final sd = o.ctrl > 0 ? 1 : 0;
@@ -493,8 +521,10 @@ class WorldPainter extends CustomPainter {
       g.strokeStyle = 'rgba(227,179,65,.7)';
       g.lineWidth = 2 / cam.z;
       g.dash = [10 / cam.z, 8 / cam.z];
+      g.dashKey = 'zone${S.player}';
       g.strokeRect(z.x0, z.y0, z.x1 - z.x0, z.y1 - z.y0);
       g.dash = null;
+      g.dashKey = null;
     }
     for (final sq in S.squads) {
       if (sq.dead || sq.carried != 0 || !inV(sq)) continue;
@@ -568,7 +598,7 @@ class WorldPainter extends CustomPainter {
     // дым
     for (final s in S.smokes) {
       if (s.x < vx0 - 80 || s.x > vx1 + 80 || s.y < vy0 - 80 || s.y > vy1 + 80) continue;
-      for (int i = 0; i < 9; i++) {
+      for (int i = 0; i < (UI.lite ? 5 : 9); i++) {
         final a = i * 2.4 + S.t * .12 * (i % 2 == 1 ? 1 : -1), r = s.r * (.2 + (i % 4) * .17);
         g.fill = rgba(224, 228, 230, .34 - (i % 3) * .05);
         g.fillCircle(s.x + math.cos(a) * r, s.y + math.sin(a) * r, s.r * (.34 + (i % 3) * .06));
