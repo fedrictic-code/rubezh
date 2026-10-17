@@ -126,7 +126,7 @@ class _UnitsPageState extends State<UnitsPage> {
                     const VerticalDivider(width: 1),
                     Expanded(child: u == null ? const Center(child: Text('Выберите юнит слева', style: TextStyle(color: kMut))) : _form()),
                   ])
-                : const SoldierArt(),
+                : SoldierArt(),
           ),
         ]),
       ),

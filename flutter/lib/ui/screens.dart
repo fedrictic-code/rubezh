@@ -59,7 +59,7 @@ class MenuScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(child: _SideBtn(1)),
                   ]),
-                  if (allMaps().length > 1) ...[const SizedBox(height: 10), const _MapPick()],
+                  if (allMaps().length > 1) ...[const SizedBox(height: 10), _MapPick()],
                   const SizedBox(height: 10),
                   Seg<String>(
                     items: [for (final e in DIFFS.entries) (e.key, e.value.name)],
@@ -101,7 +101,7 @@ class MenuScreen extends StatelessWidget {
 }
 
 class _MapPick extends StatelessWidget {
-  const _MapPick();
+  _MapPick();
   Future<void> _go(int d) async {
     if (APP.mapLoading) return;
     final maps = allMaps();

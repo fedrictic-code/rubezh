@@ -40,21 +40,21 @@ class Hud extends StatelessWidget {
                 right: 0,
                 bottom: 0,
                 child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  const _Toast(),
+                  _Toast(),
                   if (!dep && sel.isNotEmpty) ...[_InfoCard(sel: sel), const SizedBox(height: 6), _Orders(sel: sel), const SizedBox(height: 8)],
                   if (dep) ...[
                     Padding(padding: const EdgeInsets.symmetric(horizontal: 40), child: KeyedSubtree(key: TUT.keys['begin'], child: BigBtn('В бой', CTL.beginBattle, icon: Icons.keyboard_double_arrow_right))),
                     const SizedBox(height: 10),
                   ] else ...[
-                    const _ActionRow(),
+                    _ActionRow(),
                     const SizedBox(height: 8),
                   ],
-                  KeyedSubtree(key: TUT.keys['strip'], child: const _Strip()),
+                  KeyedSubtree(key: TUT.keys['strip'], child: _Strip()),
                 ]),
               ),
             ]),
           ),
-          if (CTL.deckOpen) const Positioned(left: 0, right: 0, bottom: 0, child: _DeckSheet()),
+          if (CTL.deckOpen) Positioned(left: 0, right: 0, bottom: 0, child: _DeckSheet()),
           const RepaintBoundary(child: CoachLayer()),
           if (APP.showPerf)
             Positioned(
@@ -139,7 +139,7 @@ class _Top extends StatelessWidget {
           ]),
         ),
         const SizedBox(width: 8),
-        const _Mini(),
+        _Mini(),
       ]),
     ]);
   }

@@ -122,8 +122,8 @@ class _RootState extends State<Root> with SingleTickerProviderStateMixin {
             if (sc == Screen.menu) const MenuScreen(),
             if (sc == Screen.force) const ForceScreen(),
             if (sc == Screen.game) const RepaintBoundary(child: Hud()),
-            if (sc == Screen.game && APP.endShown) const EndScreen(),
-            if (APP.settingsOpen) const SettingsSheet(),
+            if (sc == Screen.game && APP.endShown) EndScreen(),
+            if (APP.settingsOpen) SettingsSheet(),
           ]);
         },
       ),
