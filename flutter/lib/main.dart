@@ -57,6 +57,7 @@ class _RootState extends State<Root> with SingleTickerProviderStateMixin {
     await Fx.init();
     wireHooks();
     await bootMod();
+    Fx.warm();
     final maps = allMaps();
     await prepareMap(maps.firstWhere((m) => m.id == APP.mapId, orElse: () => maps.first));
     if (!mounted) return;

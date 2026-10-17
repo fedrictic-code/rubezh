@@ -19,7 +19,7 @@ class Fx {
     'shot_rifle': .45, 'shot_mg': .5, 'shot_hmg': .6, 'shot_sniper': .6, 'shot_ugl': .5, 'shot_acan': .6, 'shot_cannon': .75, //
     'shot_rocket': .7, 'shot_atgm': .7, 'shot_mortar': .7, 'arty': .7, 'boom': .9, 'boom_small': .45, 'boom_big': 1,
   };
-  static final Map<String, List<AudioPlayer>> _pool = {};
+  static final Map<String, List<_Voice>> _pool = {};
   static final Map<String, int> _rr = {};
   static bool _ready = false;
   static int _winStart = 0, _winCnt = 0, _lastHeavy = 0;
@@ -31,17 +31,34 @@ class Fx {
     _ready = true;
   }
 
-  /// Проиграть файл (путь внутри assets/). Плееры создаются по мере надобности, до 3 на файл.
+  /// Заранее загрузить все звуки (интерфейс и ячейки мода), чтобы в бою не было подгрузки.
+  static void warm() {
+    if (!_ready) return;
+    for (final p in _ui.values) {
+      _voices(p, 1);
+    }
+    for (final l in SOUNDS.values) {
+      for (final p in l) {
+        _voices(p, 2);
+      }
+    }
+  }
+
+  static List<_Voice> _voices(String path, int n) => _pool.putIfAbsent(path, () {
+        final l = [for (int i = 0; i < n; i++) _Voice()];
+        for (final v in l) {
+          v.load(path);
+        }
+        return l;
+      });
+
+  /// Проиграть файл (путь внутри assets/). Каждый файл загружается один раз, дальше только запуск.
   static void playPath(String path, double vol) {
     if (!_ready || !APP.sound || vol < .02) return;
-    final l = _pool.putIfAbsent(path, () => []);
+    final l = _voices(path, _ui.containsValue(path) ? 1 : 2);
     final i = _rr[path] ?? 0;
     _rr[path] = i + 1;
-    if (l.length < 3) l.add(AudioPlayer());
-    final p = l[i % l.length];
-    try {
-      p.play(AssetSource(path), volume: math.min(1.0, vol), mode: PlayerMode.lowLatency).catchError((_) {});
-    } catch (_) {}
+    l[i % l.length].play(math.min(1.0, vol));
   }
 
   /// Звук интерфейса по имени (tap, select, order…).
@@ -61,15 +78,16 @@ class Fx {
   static void world(String kind, double x, double y, double vol, {required bool paused}) {
     if (UI.menu || paused) return;
     final now = DateTime.now().millisecondsSinceEpoch;
-    if (now - _winStart > 110) {
+    // не больше двух звуков боя за 0,16 с — иначе звуковая система телефона перегружается
+    if (now - _winStart > 160) {
       _winStart = now;
       _winCnt = 0;
     }
-    if (++_winCnt > 5) return;
+    if (++_winCnt > 2) return;
     final d = dist(x, y, cam.x, cam.y);
     final reach = 1100 / math.max(.6, cam.z * 1.3);
     final g = vol * math.max(0, 1 - d / reach);
-    if (g < .04) return;
+    if (g < .1) return;
     String s;
     if (kind.startsWith('boom:')) {
       s = switch (kind) { 'boom:1' => 'boom_small', 'boom:2' => 'boom_big', _ => 'boom' };
@@ -116,5 +134,32 @@ class Fx {
   static void deny() {
     play('deny', .4);
     haptic(1);
+  }
+}
+
+class _Voice {
+  final AudioPlayer p = AudioPlayer();
+  bool ready = false;
+  double vol = -1;
+
+  Future<void> load(String path) async {
+    try {
+      await p.setPlayerMode(PlayerMode.lowLatency);
+      await p.setReleaseMode(ReleaseMode.stop);
+      await p.setSource(AssetSource(path));
+      ready = true;
+    } catch (_) {}
+  }
+
+  void play(double v) {
+    if (!ready) return;
+    final q = (v * 10).roundToDouble() / 10;
+    try {
+      if (q != vol) {
+        vol = q;
+        p.setVolume(q).catchError((_) {});
+      }
+      p.stop().then((_) => p.resume()).catchError((_) {});
+    } catch (_) {}
   }
 }
