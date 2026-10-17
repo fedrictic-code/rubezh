@@ -80,12 +80,23 @@ Map<String, dynamic> artToJson(UnitArt a) => {
       'scale': a.scale,
       'tx': a.tx,
       'ty': a.ty,
+      'tscale': a.tscale,
+      'px': a.px,
+      'py': a.py,
     };
 
 UnitArt? artFromJson(dynamic j) {
   if (j == null) return null;
   final m = j as Map<String, dynamic>;
-  return UnitArt(hull: m['hull'] as String?, turret: m['turret'] as String?, scale: _d(m['scale'], 1), tx: _d(m['tx']), ty: _d(m['ty']));
+  return UnitArt(
+      hull: m['hull'] as String?,
+      turret: m['turret'] as String?,
+      scale: _d(m['scale'], 1),
+      tx: _d(m['tx']),
+      ty: _d(m['ty']),
+      tscale: _d(m['tscale'], 1),
+      px: _d(m['px'], .5),
+      py: _d(m['py'], .5));
 }
 
 Map<String, dynamic> unitToJson(Variant v) => {

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rubezh/game/data.dart';
 import 'package:rubezh/gfx/sprites.dart';
 import 'package:rubezh/mod/codec.dart';
@@ -45,6 +46,7 @@ class _UnitsPageState extends State<UnitsPage> {
   String q = '';
   int tab = 0;
   int ver = 0; // для пересоздания полей при выборе
+  bool spin = true;
 
   @override
   void initState() {
@@ -402,7 +404,7 @@ class _UnitsPageState extends State<UnitsPage> {
     void putArt() => set('art', art.isEmpty ? null : art);
     Future<void> pick(String part) async {
       final png = await pickSprite(context, part == 'hull' ? 'Корпус' : 'Башня',
-          hint: part == 'hull' ? 'Корпус без башни, нос машины смотрит вправо.' : 'Башня отдельно, ствол смотрит вправо. Центр картинки — ось вращения.');
+          hint: part == 'hull' ? 'Корпус без башни, нос машины смотрит вправо.' : 'Башня отдельно, ствол смотрит вправо. Точку вращения потом можно указать кликом.');
       if (png == null) return;
       final rel = 'mod/art/${id}_$part.png';
       await ED.ws.write(rel, png);
@@ -412,9 +414,54 @@ class _UnitsPageState extends State<UnitsPage> {
       putArt();
     }
 
+    double g(String k, double d) => ((art[k] ?? d) as num).toDouble();
+    void setA(String k, double v, [int digits = 3]) {
+      art[k] = double.parse(v.toStringAsFixed(digits));
+      putArt();
+    }
+
     return Section('Графика', [
       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        VehPreview(key: ValueKey('pv$k${art.hashCode}${ED.rev}'), unit: x),
+        Column(children: [
+          VehPreview(
+            key: ValueKey('pv$k${ED.rev}${art['hull']}${art['turret']}'),
+            unit: x,
+            spin: spin,
+            onPlace: art['hull'] == null
+                ? null
+                : (tx, ty) {
+                    art['tx'] = double.parse(tx.toStringAsFixed(3));
+                    art['ty'] = double.parse(ty.toStringAsFixed(3));
+                    putArt();
+                  },
+          ),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: 320,
+            child: Row(children: [
+              Switch(value: spin, onChanged: (v) => setState(() => spin = v)),
+              const SizedBox(width: 6),
+              const Expanded(child: Text('Вращать башню', style: TextStyle(fontSize: 13))),
+            ]),
+          ),
+          if (art['hull'] != null)
+            const SizedBox(width: 320, child: Text('Клик по корпусу — поставить туда ось башни.', style: TextStyle(color: kMut, fontSize: 12))),
+          if (art['turret'] != null) ...[
+            const SizedBox(height: 10),
+            PivotPicker(
+              key: ValueKey('pp$k${ED.rev}${art['turret']}'),
+              path: art['turret'] as String,
+              px: g('px', .5),
+              py: g('py', .5),
+              onPick: (px, py) {
+                art['px'] = double.parse(px.toStringAsFixed(3));
+                art['py'] = double.parse(py.toStringAsFixed(3));
+                putArt();
+              },
+            ),
+            const SizedBox(width: 320, child: Text('Клик по башне — точка, вокруг которой она вращается (центр погона).', style: TextStyle(color: kMut, fontSize: 12))),
+          ],
+        ]),
         const SizedBox(width: 16),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -424,6 +471,14 @@ class _UnitsPageState extends State<UnitsPage> {
             Wrap(spacing: 8, runSpacing: 8, children: [
               FilledButton.tonalIcon(onPressed: () => pick('hull'), icon: const Icon(Icons.image_outlined), label: Text(art['hull'] == null ? 'Загрузить корпус' : 'Заменить корпус')),
               FilledButton.tonalIcon(onPressed: () => pick('turret'), icon: const Icon(Icons.image_outlined), label: Text(art['turret'] == null ? 'Загрузить башню' : 'Заменить башню')),
+              if (art['turret'] != null)
+                TextButton(
+                  onPressed: () {
+                    art.remove('turret');
+                    putArt();
+                  },
+                  child: const Text('Без башни'),
+                ),
               if (art.isNotEmpty)
                 TextButton(
                   onPressed: () {
@@ -435,18 +490,17 @@ class _UnitsPageState extends State<UnitsPage> {
             ]),
             if (art['hull'] != null) ...[
               const SizedBox(height: 10),
-              SliderF('Масштаб', ((art['scale'] ?? 1) as num).toDouble(), .4, 2.5, (v) {
-                art['scale'] = double.parse(v.toStringAsFixed(2));
-                putArt();
-              }),
-              SliderF('Башня вдоль', ((art['tx'] ?? 0) as num).toDouble(), -.5, .5, (v) {
-                art['tx'] = double.parse(v.toStringAsFixed(3));
-                putArt();
-              }),
-              SliderF('Башня поперёк', ((art['ty'] ?? 0) as num).toDouble(), -.5, .5, (v) {
-                art['ty'] = double.parse(v.toStringAsFixed(3));
-                putArt();
-              }),
+              const Text('КОРПУС', style: TextStyle(color: kMut, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
+              SliderF('Масштаб корпуса', g('scale', 1), .3, 2.5, (v) => setA('scale', v, 2)),
+              const SizedBox(height: 6),
+              const Text('БАШНЯ', style: TextStyle(color: kMut, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
+              if (art['turret'] != null) SliderF('Размер башни', g('tscale', 1), .2, 2.5, (v) => setA('tscale', v, 2)),
+              SliderF('Ось на корпусе: вдоль', g('tx', 0), -.6, .6, (v) => setA('tx', v)),
+              SliderF('Ось на корпусе: поперёк', g('ty', 0), -.6, .6, (v) => setA('ty', v)),
+              if (art['turret'] != null) ...[
+                SliderF('Точка вращения: X', g('px', .5), 0, 1, (v) => setA('px', v)),
+                SliderF('Точка вращения: Y', g('py', .5), 0, 1, (v) => setA('py', v)),
+              ],
             ],
             const SizedBox(height: 6),
             const Text('PNG с прозрачным фоном лучше всего. Фон можно убрать при загрузке.', style: TextStyle(color: kMut, fontSize: 12)),
@@ -457,10 +511,12 @@ class _UnitsPageState extends State<UnitsPage> {
   }
 }
 
-/// Предпросмотр техники: корпус и вращающаяся башня в масштабе игры.
+/// Предпросмотр техники: корпус и башня в масштабе игры; клик по корпусу ставит ось башни.
 class VehPreview extends StatefulWidget {
   final Map<String, dynamic> unit;
-  const VehPreview({super.key, required this.unit});
+  final bool spin;
+  final void Function(double tx, double ty)? onPlace;
+  const VehPreview({super.key, required this.unit, this.spin = true, this.onPlace});
   @override
   State<VehPreview> createState() => _VehPreviewState();
 }
@@ -468,7 +524,7 @@ class VehPreview extends StatefulWidget {
 class _VehPreviewState extends State<VehPreview> with SingleTickerProviderStateMixin {
   late final AnimationController ac = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat();
   ui.Image? hull, tur;
-  int side = 0;
+  static const Size sz = Size(320, 240);
 
   @override
   void initState() {
@@ -488,7 +544,6 @@ class _VehPreviewState extends State<VehPreview> with SingleTickerProviderStateM
         final v = unitFromJson(u);
         final look = (u['look'] != null ? BASE_VARS[u['look']] : null) ?? BASE_VARS[u['id']] ?? v;
         final s = look.sides.first;
-        side = s;
         h = await spHull(look, s);
         t = (await spTurret(look, s)).img;
       } catch (_) {}
@@ -508,12 +563,41 @@ class _VehPreviewState extends State<VehPreview> with SingleTickerProviderStateM
   }
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: 260,
-        height: 200,
-        decoration: BoxDecoration(color: const Color(0xFF3A4A2E), borderRadius: BorderRadius.circular(10), border: Border.all(color: kLine)),
-        child: AnimatedBuilder(animation: ac, builder: (_, __) => CustomPaint(painter: _VehPainter(widget.unit, hull, tur, ac.value))),
+  Widget build(BuildContext context) => GestureDetector(
+        onTapDown: widget.onPlace == null
+            ? null
+            : (d) {
+                final g = VehGeom(widget.unit, hull, sz);
+                final wx = (d.localPosition.dx - sz.width / 2) / g.k, wy = (d.localPosition.dy - sz.height / 2) / g.k;
+                widget.onPlace!((wx / g.len).clamp(-.6, .6), (wy / g.wid).clamp(-.6, .6));
+              },
+        child: MouseRegion(
+          cursor: widget.onPlace == null ? MouseCursor.defer : SystemMouseCursors.precise,
+          child: Container(
+            width: sz.width,
+            height: sz.height,
+            decoration: BoxDecoration(color: const Color(0xFF3A4A2E), borderRadius: BorderRadius.circular(10), border: Border.all(color: kLine)),
+            child: AnimatedBuilder(animation: ac, builder: (_, __) => CustomPaint(painter: _VehPainter(widget.unit, hull, tur, widget.spin ? ac.value : 0))),
+          ),
+        ),
       );
+}
+
+/// Геометрия предпросмотра: размеры в метрах игры и масштаб на экране.
+class VehGeom {
+  late final double len, wid, hw, hh, k;
+  late final bool custom;
+  late final Map? art;
+  VehGeom(Map<String, dynamic> u, ui.Image? hull, Size s) {
+    len = ((u['len'] ?? 30) as num).toDouble();
+    wid = ((u['wid'] ?? 14) as num).toDouble();
+    art = u['art'] as Map?;
+    custom = art?['hull'] != null;
+    final sc = custom ? ((art!['scale'] ?? 1) as num).toDouble() : 1.0;
+    hw = (len + 3) * sc;
+    hh = custom && hull != null ? hw * hull.height / hull.width : wid + 3;
+    k = math.min(s.width * .72 / math.max(hw, len), s.height * .72 / math.max(hh, wid));
+  }
 }
 
 class _VehPainter extends CustomPainter {
@@ -524,37 +608,117 @@ class _VehPainter extends CustomPainter {
 
   @override
   void paint(Canvas c, Size s) {
-    final len = ((u['len'] ?? 30) as num).toDouble(), wid = ((u['wid'] ?? 14) as num).toDouble();
-    final art = u['art'] as Map?;
-    final custom = art?['hull'] != null;
-    final sc = custom ? ((art!['scale'] ?? 1) as num).toDouble() : 1.0;
-    final hw = (len + 3) * sc;
-    final k = math.min(s.width * .7 / math.max(hw, 1), s.height * .7 / math.max(wid + 3, 1));
+    final g = VehGeom(u, hull, s);
+    final k = g.k;
     c.translate(s.width / 2, s.height / 2);
     c.scale(k);
-    // габарит
-    c.drawRect(Rect.fromCenter(center: Offset.zero, width: len, height: wid), Paint()
+    // габарит машины
+    c.drawRect(Rect.fromCenter(center: Offset.zero, width: g.len, height: g.wid), Paint()
       ..color = Colors.white24
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1 / k);
     final h = hull;
     if (h == null) return;
-    final hh = custom ? hw * h.height / h.width : wid + 3;
     final p = Paint()..filterQuality = FilterQuality.medium;
-    c.drawImageRect(h, Rect.fromLTWH(0, 0, h.width.toDouble(), h.height.toDouble()), Rect.fromCenter(center: Offset.zero, width: hw, height: hh), p);
+    c.drawImageRect(h, Rect.fromLTWH(0, 0, h.width.toDouble(), h.height.toDouble()), Rect.fromCenter(center: Offset.zero, width: g.hw, height: g.hh), p);
+    final art = g.art;
+    double num0(String key, double d) => ((art?[key] ?? d) as num).toDouble();
+    final tx = g.custom ? g.len * num0('tx', 0) : g.len * .05, ty = g.custom ? g.wid * num0('ty', 0) : 0.0;
     final tu = tur;
-    if (tu == null) return;
-    final tx = custom ? len * ((art!['tx'] ?? 0) as num).toDouble() : len * .05, ty = custom ? wid * ((art!['ty'] ?? 0) as num).toDouble() : 0.0;
-    final tw = custom ? hw * tu.width / h.width : (len + 3), th = custom ? tw * tu.height / tu.width : (wid + 3);
     c.save();
     c.translate(tx, ty);
     c.rotate(math.sin(t * math.pi * 2) * .9);
-    c.drawImageRect(tu, Rect.fromLTWH(0, 0, tu.width.toDouble(), tu.height.toDouble()), Rect.fromCenter(center: Offset.zero, width: tw, height: th), p);
+    if (tu != null) {
+      final tw = g.custom ? g.hw * tu.width / h.width * num0('tscale', 1) : (g.len + 3), th = tw * tu.height / tu.width;
+      final px = g.custom ? num0('px', .5) : .5, py = g.custom ? num0('py', .5) : .5;
+      c.drawImageRect(tu, Rect.fromLTWH(0, 0, tu.width.toDouble(), tu.height.toDouble()), Rect.fromLTWH(-tw * px, -th * py, tw, th), p);
+    }
+    // ось вращения
+    final cr = Paint()
+      ..color = const Color(0xFFE3B341)
+      ..strokeWidth = 1.5 / k;
+    c.drawLine(Offset(-4 / k, 0), Offset(4 / k, 0), cr);
+    c.drawLine(Offset(0, -4 / k), Offset(0, 4 / k), cr);
     c.restore();
   }
 
   @override
   bool shouldRepaint(covariant _VehPainter o) => true;
+}
+
+/// Картинка башни отдельно: клик задаёт точку вращения.
+class PivotPicker extends StatefulWidget {
+  final String path;
+  final double px, py;
+  final void Function(double px, double py) onPick;
+  const PivotPicker({super.key, required this.path, required this.px, required this.py, required this.onPick});
+  @override
+  State<PivotPicker> createState() => _PivotPickerState();
+}
+
+class _PivotPickerState extends State<PivotPicker> {
+  ui.Image? img;
+  static const Size sz = Size(320, 160);
+
+  @override
+  void initState() {
+    super.initState();
+    ED.image(widget.path).then((i) {
+      if (mounted) setState(() => img = i);
+    });
+  }
+
+  Rect _dst() {
+    final i = img!;
+    final k = math.min((sz.width - 20) / i.width, (sz.height - 20) / i.height);
+    final w = i.width * k, h = i.height * k;
+    return Rect.fromLTWH((sz.width - w) / 2, (sz.height - h) / 2, w, h);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: img == null
+          ? null
+          : (d) {
+              final r = _dst();
+              widget.onPick(((d.localPosition.dx - r.left) / r.width).clamp(0.0, 1.0), ((d.localPosition.dy - r.top) / r.height).clamp(0.0, 1.0));
+            },
+      child: MouseRegion(
+        cursor: SystemMouseCursors.precise,
+        child: Container(
+          width: sz.width,
+          height: sz.height,
+          decoration: BoxDecoration(color: const Color(0xFF2A3A24), borderRadius: BorderRadius.circular(10), border: Border.all(color: kLine)),
+          child: img == null ? null : CustomPaint(painter: _PivotPainter(img!, _dst(), widget.px, widget.py)),
+        ),
+      ),
+    );
+  }
+}
+
+class _PivotPainter extends CustomPainter {
+  final ui.Image img;
+  final Rect dst;
+  final double px, py;
+  _PivotPainter(this.img, this.dst, this.px, this.py);
+  @override
+  void paint(Canvas c, Size s) {
+    c.drawRect(dst, Paint()
+      ..color = Colors.white12
+      ..style = PaintingStyle.stroke);
+    c.drawImageRect(img, Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()), dst, Paint()..filterQuality = FilterQuality.medium);
+    final o = Offset(dst.left + dst.width * px, dst.top + dst.height * py);
+    final p = Paint()
+      ..color = const Color(0xFFE3B341)
+      ..strokeWidth = 2;
+    c.drawLine(o.translate(-10, 0), o.translate(10, 0), p);
+    c.drawLine(o.translate(0, -10), o.translate(0, 10), p);
+    c.drawCircle(o, 6, p..style = PaintingStyle.stroke);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PivotPainter o) => o.px != px || o.py != py || o.img != img || o.dst != dst;
 }
 
 /// Графика бойцов: для каждой стороны и вида бойца — своя картинка (вид сверху, смотрит вправо).

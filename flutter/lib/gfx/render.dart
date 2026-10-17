@@ -215,10 +215,10 @@ void drawVeh(Ctx2D g, double x, double y, double fa, double ta, Variant t, int s
   if (!UI.lite) {
     g.save();
     g.translate(2.2, 2.8);
-    g.imageAt(sp.tur.img, -sp.tur.w / 2, -sp.tur.h / 2, sp.tur.w, sp.tur.h, filter: _shadowF, opacity: .28);
+    g.imageAt(sp.tur.img, -sp.tur.w * sp.tur.px, -sp.tur.h * sp.tur.py, sp.tur.w, sp.tur.h, filter: _shadowF, opacity: .28);
     g.restore();
   }
-  g.imageAt(sp.tur.img, -sp.tur.w / 2, -sp.tur.h / 2, sp.tur.w, sp.tur.h, filter: wreck ? _deadT : null);
+  g.imageAt(sp.tur.img, -sp.tur.w * sp.tur.px, -sp.tur.h * sp.tur.py, sp.tur.w, sp.tur.h, filter: wreck ? _deadT : null);
   g.restore();
 }
 

@@ -258,7 +258,9 @@ Future<ui.Image> spHull(Variant v, int side) async {
 class TurretSprite {
   final ui.Image img;
   final double w, h;
-  TurretSprite(this.img, this.w, this.h);
+  /// Точка вращения на картинке (доли ширины и высоты).
+  final double px, py;
+  TurretSprite(this.img, this.w, this.h, {this.px = .5, this.py = .5});
 }
 
 /* ---------- башня (центр картинки = ось вращения) ---------- */
@@ -627,8 +629,8 @@ class SpriteCache {
         if (hullImg != null) {
           final hw = (v.len + 3) * art!.scale, hh = hw * hullImg.height / hullImg.width;
           final ti = turImg ?? await _blank();
-          final tw = turImg == null ? 1.0 : hw * ti.width / hullImg.width, th = turImg == null ? 1.0 : tw * ti.height / ti.width;
-          veh[key] = VehSprite(hullImg, TurretSprite(ti, tw, th), hw, hh, v.len * art.tx, v.wid * art.ty);
+          final tw = turImg == null ? 1.0 : hw * ti.width / hullImg.width * art.tscale, th = turImg == null ? 1.0 : tw * ti.height / ti.width;
+          veh[key] = VehSprite(hullImg, TurretSprite(ti, tw, th, px: art.px, py: art.py), hw, hh, v.len * art.tx, v.wid * art.ty);
           continue;
         }
         // нарисованный кодом вид: свой или взятый у другого юнита («look»)

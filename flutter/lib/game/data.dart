@@ -37,8 +37,10 @@ class Man {
 /// Своя графика юнита (пути внутри assets/, картинки смотрят вправо).
 class UnitArt {
   final String? hull, turret;
-  final double scale, tx, ty;
-  const UnitArt({this.hull, this.turret, this.scale = 1, this.tx = 0, this.ty = 0});
+  /// scale — масштаб корпуса; tx, ty — где на корпусе ось башни (доли длины и ширины от центра);
+  /// tscale — масштаб башни относительно корпуса; px, py — точка вращения на картинке башни (0…1).
+  final double scale, tx, ty, tscale, px, py;
+  const UnitArt({this.hull, this.turret, this.scale = 1, this.tx = 0, this.ty = 0, this.tscale = 1, this.px = .5, this.py = .5});
 }
 
 class Variant {
