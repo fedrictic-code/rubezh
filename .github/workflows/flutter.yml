@@ -62,6 +62,7 @@ jobs:
           (cd build/web && python -m http.server 8099 > /dev/null 2>&1 &)
           sleep 2
           python ci/shot.py ci_out http://localhost:8099 $(cat ci/screens.txt) > ci_out/shot.txt 2>&1
+          python ci/interact.py ci_out http://localhost:8099 > ci_out/interact.txt 2>&1 || true
       - name: Диагностика в ветку ci-out
         if: always()
         run: bash ci/publish.sh "analyze=${{ steps.analyze.outcome }} test=${{ steps.test.outcome }} apk=${{ steps.apk.outcome }} web=${{ steps.web.outcome }}" "${{ github.sha }}" "${{ github.repository }}" "${{ secrets.GITHUB_TOKEN }}"
