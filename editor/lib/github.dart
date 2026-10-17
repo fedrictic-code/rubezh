@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import 'net.dart';
+
 class GhError implements Exception {
   final int code;
   final String body;
@@ -22,8 +24,8 @@ class GitHub {
   final String owner, repo, branch, token;
   /// Папка мода в репозитории.
   static const String prefix = 'flutter/assets/';
-  final http.Client _c = http.Client();
-  GitHub(this.owner, this.repo, this.branch, this.token);
+  final http.Client _c;
+  GitHub(this.owner, this.repo, this.branch, this.token, {String? proxy}) : _c = makeClient(proxy);
 
   Map<String, String> get _h => {
         if (token.isNotEmpty) 'Authorization': 'Bearer $token',

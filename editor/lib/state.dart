@@ -21,6 +21,7 @@ class Ed extends ChangeNotifier {
   final List<String> mapPaths = [];
   final Map<String, ui.Image> _img = {};
   String owner = 'fedrictic-code', repo = 'rubezh', branch = 'main', token = '';
+  String proxy = ''; // host:port, пусто — напрямую
   String toast = '';
   bool ready = false;
   int rev = 0; // счётчик изменений для перерисовки
@@ -35,6 +36,7 @@ class Ed extends ChangeNotifier {
       repo = pr.getString('gh_repo') ?? repo;
       branch = pr.getString('gh_branch') ?? branch;
       token = pr.getString('gh_token') ?? '';
+      proxy = pr.getString('gh_proxy') ?? '';
     } catch (_) {}
     if (kIsWeb) {
       ws = Workspace('/', memory: true);
@@ -66,6 +68,7 @@ class Ed extends ChangeNotifier {
     pr.setString('gh_repo', repo);
     pr.setString('gh_branch', branch);
     pr.setString('gh_token', token);
+    pr.setString('gh_proxy', proxy);
   }
 
   void say(String s) {

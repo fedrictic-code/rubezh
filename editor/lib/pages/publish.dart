@@ -11,6 +11,7 @@ import 'package:rubezh/mod/mod.dart';
 
 import '../files.dart';
 import '../github.dart';
+import '../net.dart';
 import '../state.dart';
 import '../widgets.dart';
 
@@ -41,8 +42,32 @@ class _PublishPageState extends State<PublishPage> {
   final TextEditingController msg = TextEditingController(text: 'Мод: изменения из редактора');
   bool showToken = false;
   late final TextEditingController tokenC = TextEditingController(text: ED.token);
+  late final TextEditingController proxyC = TextEditingController(text: ED.proxy);
+  String proxyNote = '';
 
-  GitHub gh() => GitHub(ED.owner.trim(), ED.repo.trim(), ED.branch.trim(), ED.token.trim());
+  @override
+  void initState() {
+    super.initState();
+    // при первом запуске подставить системный прокси, если он включён
+    if (ED.proxy.isEmpty) detectProxy(silent: true);
+  }
+
+  Future<void> detectProxy({bool silent = false}) async {
+    final p = await systemProxy();
+    if (!mounted) return;
+    setState(() {
+      if (p != null) {
+        ED.proxy = p;
+        proxyC.text = p;
+        ED.saveGh();
+        proxyNote = 'Найден системный прокси: $p';
+      } else if (!silent) {
+        proxyNote = 'Системный прокси не включён. Если GitHub работает только через VPN, впишите адрес прокси вручную (обычно 127.0.0.1:7890 или 127.0.0.1:10809).';
+      }
+    });
+  }
+
+  GitHub gh() => GitHub(ED.owner.trim(), ED.repo.trim(), ED.branch.trim(), ED.token.trim(), proxy: ED.proxy.trim());
 
   void _log(String s) => setState(() {
         step = s;
@@ -55,7 +80,7 @@ class _PublishPageState extends State<PublishPage> {
       final r = await gh().check();
       setState(() => check = r);
     } catch (e) {
-      setState(() => check = '$e');
+      setState(() => check = netHint(e));
     }
   }
 
@@ -81,7 +106,7 @@ class _PublishPageState extends State<PublishPage> {
       final d = await diff();
       setState(() => changes = d);
     } catch (e) {
-      setState(() => error = '$e');
+      setState(() => error = netHint(e));
     }
     setState(() => busy = false);
   }
@@ -113,7 +138,7 @@ class _PublishPageState extends State<PublishPage> {
       _log('Готово: мод загружен из ${ED.owner}/${ED.repo}');
       setState(() => changes = {});
     } catch (e) {
-      setState(() => error = '$e');
+      setState(() => error = netHint(e));
     }
     setState(() => busy = false);
   }
@@ -191,7 +216,7 @@ class _PublishPageState extends State<PublishPage> {
       setState(() => apkPath = f.path);
       _log('APK сохранён: ${f.path}');
     } catch (e) {
-      setState(() => error = '$e');
+      setState(() => error = netHint(e));
       _log('Ошибка: $e');
     }
     setState(() => busy = false);
@@ -239,7 +264,23 @@ class _PublishPageState extends State<PublishPage> {
             const SizedBox(width: 8),
             OutlinedButton(onPressed: doCheck, child: const Text('Проверить')),
           ]),
-          if (check.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(check)),
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(
+              child: TextField(
+                controller: proxyC,
+                decoration: const InputDecoration(labelText: 'Прокси (host:port), пусто — напрямую', hintText: '127.0.0.1:7890', isDense: true, border: OutlineInputBorder()),
+                onChanged: (v) {
+                  ED.proxy = v.trim();
+                  ED.saveGh();
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(onPressed: () => detectProxy(), child: const Text('Определить')),
+          ]),
+          if (proxyNote.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(proxyNote, style: const TextStyle(color: kMut, fontSize: 12))),
+          if (check.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: SelectableText(check)),
           const SizedBox(height: 6),
           const Text('Токен хранится только на этом компьютере. Создать: github.com → Settings → Developer settings → Fine-grained tokens, доступ только к этому репозиторию.',
               style: TextStyle(color: kMut, fontSize: 12)),
