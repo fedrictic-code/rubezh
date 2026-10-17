@@ -1,0 +1,24 @@
+00:00 +0: loading /home/runner/work/rubezh/rubezh/flutter/test/smoke_test.dart
+00:00 +0: /home/runner/work/rubezh/rubezh/flutter/test/smoke_test.dart: приложение запускается
+00:00 +1: /home/runner/work/rubezh/rubezh/flutter/test/smoke_test.dart: приложение запускается
+00:00 +1: /home/runner/work/rubezh/rubezh/flutter/test/sim_test.dart: карта: река, мост, дорога проходимы
+местность: {0: 6535, 3: 232, 1: 1793, 8: 36, 5: 33, 2: 121, 6: 11, 4: 225, 7: 14}
+00:00 +2: /home/runner/work/rubezh/rubezh/flutter/test/smoke_test.dart: приложение запускается
+00:00 +3: /home/runner/work/rubezh/rubezh/flutter/test/sim_test.dart: бой ИИ против ИИ
+00:01 +4: /home/runner/work/rubezh/rubezh/flutter/test/sim_test.dart: бой ИИ против ИИ
+00:01 +5: /home/runner/work/rubezh/rubezh/flutter/test/sim_test.dart: бой ИИ против ИИ
+00:02 +5: /home/runner/work/rubezh/rubezh/flutter/test/mod_test.dart: карта из мода: разметка, рубежи, бой ИИ
+карта из мода: без итога · 300 с · потери [86, 106]
+00:02 +6: /home/runner/work/rubezh/rubezh/flutter/test/sim_test.dart: бой ИИ против ИИ
+00:03 +7: /home/runner/work/rubezh/rubezh/flutter/test/sim_test.dart: бой ИИ против ИИ
+00:04 +8: /home/runner/work/rubezh/rubezh/flutter/test/sim_test.dart: бой ИИ против ИИ
+seed 1: победа ВС РФ (Оба рубежа удержаны 40 секунд) · 331 с · потери [133, 31] · техника [0, 3] · отрядов 39 · 684 мс (103 мкс/шаг)
+seed 2: победа ВСУ (Время боя истекло, рубежи удержаны) · 721 с · потери [222, 294] · техника [0, 2] · отрядов 52 · 3205 мс (222 мкс/шаг)
+seed 3: победа ВСУ (Время боя истекло, рубежи удержаны) · 721 с · потери [217, 276] · техника [0, 2] · отрядов 54 · 2347 мс (163 мкс/шаг)
+seed 4: победа ВС РФ (Оба рубежа удержаны 40 секунд) · 578 с · потери [241, 124] · техника [0, 3] · отрядов 50 · 1079 мс (93 мкс/шаг)
+seed 5: победа ВСУ (Время боя истекло, рубежи удержаны) · 721 с · потери [223, 296] · техника [1, 2] · отрядов 43 · 2231 мс (155 мкс/шаг)
+seed 6: победа ВСУ (Время боя истекло, рубежи удержаны) · 721 с · потери [234, 305] · техника [1, 2] · отрядов 47 · 2759 мс (191 мкс/шаг)
+seed 7: победа ВСУ (Время боя истекло, рубежи удержаны) · 721 с · потери [278, 192] · техника [0, 4] · отрядов 49 · 2770 мс (192 мкс/шаг)
+seed 8: победа ВС РФ (Оба рубежа удержаны 40 секунд) · 366 с · потери [155, 52] · техника [2, 5] · отрядов 32 · 499 мс (68 мкс/шаг)
+ИТОГО: ВСУ 5, ВС РФ 3
+00:15 +9: All tests passed!

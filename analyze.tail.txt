@@ -1,0 +1,5 @@
+Analyzing flutter...                                            
+
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/ui/screens.dart:104:3 • prefer_const_constructors_in_immutables
+
+1 issue found. (ran in 10.9s)

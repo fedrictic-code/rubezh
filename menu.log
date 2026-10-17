@@ -1,0 +1,7 @@
+debug: Installing/Activating first service worker.
+debug: Activated new service worker.
+debug: Injecting <script> tag. Using callback.
+warning: [.WebGL-0x144001c0e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x14405d98600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x14405d98600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x14405d98600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
