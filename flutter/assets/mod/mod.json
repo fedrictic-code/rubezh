@@ -608,5 +608,15 @@
       "dur": 1.0,
       "sparks": 9
     }
+  },
+  "soldiers": {
+    "0": {
+      "rifle": "mod/art/soldier_0_rifle.png",
+      "lead": "mod/art/soldier_0_lead.png",
+      "gren": "mod/art/soldier_0_gren.png",
+      "mg": "mod/art/soldier_0_mg.png",
+      "at": "mod/art/soldier_0_at.png",
+      "sniper": "mod/art/soldier_0_sniper.png"
+    }
   }
 }
