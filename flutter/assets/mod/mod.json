@@ -59,7 +59,554 @@
         "px": 0.3,
         "py": 0.504
       }
+    },
+    {
+      "id": "bmp2",
+      "cls": "ifv",
+      "side": -1,
+      "name": "БМП-2М",
+      "desc": "30 мм, «Конкурс», экипаж 3, десант 7",
+      "hint": "Скорость и скорострельность",
+      "cost": 190.0,
+      "delay": 12.0,
+      "speed": 26.0,
+      "vision": 430.0,
+      "morale": 85.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "a2a42",
+            "pkt",
+            "konkurs"
+          ],
+          "a": {
+            "ap30": 160,
+            "he30": 340,
+            "sa762": 2000,
+            "konkurs": 4
+          }
+        },
+        {
+          "job": "commander",
+          "w": [],
+          "a": {}
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 7,
+      "len": 24.0,
+      "wid": 11.0,
+      "vuln": 0.2,
+      "stealth": 0.0,
+      "arm": "bmp2",
+      "art": {
+        "hull": "mod/art/bmp2_hull.png",
+        "scale": 0.84,
+        "turret": "mod/art/bmp2_turret.png",
+        "tx": 0.009,
+        "ty": -0.009,
+        "tscale": 0.9,
+        "px": 0.349
+      }
+    },
+    {
+      "id": "bmp3",
+      "cls": "ifv",
+      "side": 1,
+      "name": "БМП-3",
+      "desc": "100 + 30 мм, экипаж 3, десант 7",
+      "hint": "Две пушки, фугасное действие",
+      "cost": 270.0,
+      "delay": 13.0,
+      "speed": 26.0,
+      "vision": 430.0,
+      "morale": 85.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "a2a70",
+            "a2a72",
+            "pkt"
+          ],
+          "a": {
+            "he100": 40,
+            "ap30": 100,
+            "he30": 400,
+            "sa762": 2000
+          }
+        },
+        {
+          "job": "commander",
+          "w": [],
+          "a": {}
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 7,
+      "len": 26.0,
+      "wid": 11.0,
+      "vuln": 0.3,
+      "stealth": 0.0,
+      "arm": "bmp3",
+      "art": {
+        "hull": "mod/art/bmp3_hull.png",
+        "scale": 0.84,
+        "turret": "mod/art/bmp3_turret.png",
+        "px": 0.364,
+        "tx": 0.009
+      }
+    },
+    {
+      "id": "btr82",
+      "cls": "ifv",
+      "side": 1,
+      "name": "БТР-82А",
+      "desc": "30 мм, колёсный, десант 7",
+      "hint": "Быстрый и лёгкий",
+      "cost": 140.0,
+      "delay": 11.0,
+      "speed": 32.0,
+      "vision": 420.0,
+      "morale": 80.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "a2a72",
+            "pkt"
+          ],
+          "a": {
+            "ap30": 100,
+            "he30": 300,
+            "sa762": 2000
+          }
+        },
+        {
+          "job": "commander",
+          "w": [],
+          "a": {}
+        }
+      ],
+      "veh": true,
+      "wheeled": true,
+      "cap": 7,
+      "len": 24.0,
+      "wid": 10.0,
+      "vuln": 0.15,
+      "stealth": 0.0,
+      "arm": "btr82",
+      "art": {
+        "hull": "mod/art/btr82_hull.png",
+        "scale": 0.82,
+        "turret": "mod/art/btr82_turret.png",
+        "px": 0.36,
+        "tscale": 0.81,
+        "tx": 0.023,
+        "ty": -0.027
+      }
+    },
+    {
+      "id": "bradley",
+      "cls": "ifv",
+      "side": 0,
+      "name": "M2A2 Bradley",
+      "desc": "25 мм, TOW, экипаж 3, десант 6",
+      "hint": "Автопушка и ПТУР",
+      "cost": 240.0,
+      "delay": 13.0,
+      "speed": 24.0,
+      "vision": 440.0,
+      "morale": 85.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "m242",
+            "m240",
+            "tow"
+          ],
+          "a": {
+            "ap25": 150,
+            "he25": 450,
+            "sa762": 2200,
+            "tow": 3
+          }
+        },
+        {
+          "job": "commander",
+          "w": [],
+          "a": {}
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 6,
+      "len": 25.0,
+      "wid": 12.0,
+      "vuln": 0.2,
+      "stealth": 0.0,
+      "arm": "bradley",
+      "art": {
+        "hull": "mod/art/bradley_hull.png",
+        "scale": 0.88,
+        "turret": "mod/art/bradley_turret.png",
+        "px": 0.394,
+        "tscale": 0.8,
+        "tx": 0.005
+      }
+    },
+    {
+      "id": "tank_t64bv",
+      "cls": "tank",
+      "side": 0,
+      "name": "Т-64БВ",
+      "desc": "125 мм, экипаж 3",
+      "hint": "Старый, но грозный",
+      "cost": 250.0,
+      "delay": 14.0,
+      "speed": 22.0,
+      "vision": 440.0,
+      "morale": 86.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "d81",
+            "pkt"
+          ],
+          "a": {
+            "apfsds125": 12,
+            "heat125": 6,
+            "he125": 10,
+            "sa762": 1250
+          }
+        },
+        {
+          "job": "commander",
+          "w": [
+            "nsvt"
+          ],
+          "a": {
+            "sa127": 300
+          }
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 0,
+      "len": 30.0,
+      "wid": 14.0,
+      "vuln": 0.42,
+      "stealth": 0.0,
+      "arm": "t64bv",
+      "art": {
+        "hull": "mod/art/tank_t64bv_hull.png",
+        "scale": 0.88,
+        "turret": "mod/art/tank_t64bv_turret.png",
+        "px": 0.36,
+        "tx": 0.041,
+        "tscale": 0.9,
+        "ty": -0.014
+      }
+    },
+    {
+      "id": "tank_t72b3",
+      "cls": "tank",
+      "side": 1,
+      "name": "Т-72Б3",
+      "desc": "125 мм, экипаж 3",
+      "hint": "Массовый танк",
+      "cost": 290.0,
+      "delay": 14.0,
+      "speed": 22.0,
+      "vision": 440.0,
+      "morale": 88.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "d81",
+            "pkt"
+          ],
+          "a": {
+            "apfsds125": 12,
+            "heat125": 8,
+            "he125": 14,
+            "sa762": 1250
+          }
+        },
+        {
+          "job": "commander",
+          "w": [
+            "nsvt"
+          ],
+          "a": {
+            "sa127": 300
+          }
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 0,
+      "len": 30.0,
+      "wid": 14.0,
+      "vuln": 0.42,
+      "stealth": 0.0,
+      "arm": "t72b3",
+      "art": {
+        "hull": "mod/art/tank_t72b3_hull.png",
+        "scale": 0.85,
+        "turret": "mod/art/tank_t72b3_turret.png",
+        "px": 0.341,
+        "tscale": 0.95,
+        "tx": 0.014,
+        "ty": -0.018
+      }
+    },
+    {
+      "id": "tank_t80bvm",
+      "cls": "tank",
+      "side": 1,
+      "name": "Т-80БВМ",
+      "desc": "125 мм, экипаж 3",
+      "hint": "Быстрый, хорошая броня",
+      "cost": 330.0,
+      "delay": 14.0,
+      "speed": 25.0,
+      "vision": 450.0,
+      "morale": 88.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "d81",
+            "pkt"
+          ],
+          "a": {
+            "apfsds125": 14,
+            "heat125": 8,
+            "he125": 12,
+            "sa762": 1250
+          }
+        },
+        {
+          "job": "commander",
+          "w": [
+            "nsvt"
+          ],
+          "a": {
+            "sa127": 300
+          }
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 0,
+      "len": 30.0,
+      "wid": 14.0,
+      "vuln": 0.4,
+      "stealth": 0.0,
+      "arm": "t80bvm",
+      "art": {
+        "hull": "mod/art/tank_t80bvm_hull.png",
+        "scale": 0.87,
+        "turret": "mod/art/tank_t80bvm_turret.png",
+        "tx": 0.023,
+        "px": 0.341,
+        "tscale": 0.95
+      }
+    },
+    {
+      "id": "tank_leo2",
+      "cls": "tank",
+      "side": 0,
+      "name": "Leopard 2A6",
+      "desc": "120 мм, экипаж 4",
+      "hint": "Изолированный боекомплект",
+      "cost": 380.0,
+      "delay": 15.0,
+      "speed": 22.0,
+      "vision": 470.0,
+      "morale": 90.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "l55",
+            "m240"
+          ],
+          "a": {
+            "apfsds120": 22,
+            "heat120": 20,
+            "sa762": 4750
+          }
+        },
+        {
+          "job": "commander",
+          "w": [
+            "nsvt"
+          ],
+          "a": {
+            "sa127": 300
+          }
+        },
+        {
+          "job": "loader",
+          "w": [],
+          "a": {}
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 0,
+      "len": 31.0,
+      "wid": 14.0,
+      "vuln": 0.08,
+      "stealth": 0.0,
+      "arm": "leo2",
+      "art": {
+        "hull": "mod/art/tank_leo2_hull.png",
+        "scale": 0.84,
+        "turret": "mod/art/tank_leo2_turret.png",
+        "px": 0.349,
+        "tx": 0.027
+      }
+    },
+    {
+      "id": "tank_abrams",
+      "cls": "tank",
+      "side": 0,
+      "name": "M1A1 Abrams",
+      "desc": "120 мм, экипаж 4",
+      "hint": "Выбивные панели боекомплекта",
+      "cost": 400.0,
+      "delay": 15.0,
+      "speed": 23.0,
+      "vision": 470.0,
+      "morale": 90.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "m256",
+            "m240"
+          ],
+          "a": {
+            "apfsds120": 22,
+            "heat120": 18,
+            "sa762": 11400
+          }
+        },
+        {
+          "job": "commander",
+          "w": [
+            "m2"
+          ],
+          "a": {
+            "sa50": 900
+          }
+        },
+        {
+          "job": "loader",
+          "w": [],
+          "a": {}
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 0,
+      "len": 31.0,
+      "wid": 14.0,
+      "vuln": 0.07,
+      "stealth": 0.0,
+      "arm": "abrams",
+      "art": {
+        "hull": "mod/art/tank_abrams_hull.png",
+        "scale": 0.84,
+        "turret": "mod/art/tank_abrams_turret.png",
+        "px": 0.383,
+        "tscale": 0.97,
+        "tx": 0.054,
+        "ty": -0.05
+      }
     }
   ],
-  "removed": []
+  "removed": [],
+  "fx": {
+    "tracerUa": 4076829242,
+    "tracerRu": 4076829242,
+    "tracerWidth": 0.5,
+    "tracerLife": 1.0,
+    "tracerLen": 0.1,
+    "missile": 3657428158,
+    "missileSmoke": 4291348680,
+    "missileWidth": 2.2043343653251024,
+    "missileTrail": 0.0792156862745047,
+    "missileSmokeOn": true,
+    "flash": 3875528854,
+    "flashSize": 1.0,
+    "boom": {
+      "fire": 4294950490,
+      "smoke": 4282793012,
+      "size": 0.6984520123838789,
+      "dur": 1.0,
+      "sparks": 3
+    },
+    "big": {
+      "fire": 4294950490,
+      "smoke": 4282793012,
+      "size": 0.9826625386996912,
+      "dur": 1.0,
+      "sparks": 9
+    }
+  }
 }
