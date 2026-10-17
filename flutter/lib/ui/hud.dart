@@ -354,7 +354,7 @@ class _Orders extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
       decoration: glass(r: 16),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: items),
+      child: Row(children: [for (final w in items) Expanded(child: Center(child: FittedBox(fit: BoxFit.scaleDown, child: w)))]),
     );
   }
 }

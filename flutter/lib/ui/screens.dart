@@ -456,9 +456,15 @@ class EndScreen extends StatelessWidget {
 class SettingsSheet extends StatelessWidget {
   const SettingsSheet({super.key});
 
-  Widget _row(String t, Widget w) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 7),
-        child: Row(children: [Expanded(child: Text(t, style: body(15, w: FontWeight.w600))), const SizedBox(width: 10), w]),
+  /// Вся строка нажимается (не только переключатель) — так проще попасть пальцем.
+  Widget _row(String t, bool v, VoidCallback f) => Press(
+        sound: true,
+        scale: .98,
+        onTap: f,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          child: Row(children: [Expanded(child: Text(t, style: body(15, w: FontWeight.w600))), const SizedBox(width: 10), IgnorePointer(child: Toggle(v, null))]),
+        ),
       );
 
   @override
@@ -478,26 +484,26 @@ class SettingsSheet extends StatelessWidget {
             RoundBtn(icon: Icons.close, size: 40, onTap: close),
           ]),
           const SizedBox(height: 10),
-          _row('Звук', Toggle(APP.sound, () {
+          _row('Звук', APP.sound, () {
             APP.sound = !APP.sound;
             APP.changed();
-          })),
-          _row('Вибрация', Toggle(APP.haptics, () {
+          }),
+          _row('Вибрация', APP.haptics, () {
             APP.haptics = !APP.haptics;
             APP.changed();
-          })),
-          _row('Обучение в следующем бою', Toggle(APP.tutorial, () {
+          }),
+          _row('Обучение в следующем бою', APP.tutorial, () {
             APP.tutorial = !APP.tutorial;
             APP.changed();
-          })),
-          _row('Экономия батареи (30 кадров/с, проще графика)', Toggle(APP.lite, () {
+          }),
+          _row('Экономия батареи (30 кадров/с, проще графика)', APP.lite, () {
             APP.lite = !APP.lite;
             APP.changed();
-          })),
-          _row('Счётчик кадров', Toggle(APP.showPerf, () {
+          }),
+          _row('Счётчик кадров', APP.showPerf, () {
             APP.showPerf = !APP.showPerf;
             APP.changed();
-          })),
+          }),
           if (inGame) ...[
             const SizedBox(height: 8),
             GhostBtn('Проверка нагрузки: +120 отрядов', () {

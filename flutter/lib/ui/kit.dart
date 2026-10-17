@@ -253,7 +253,7 @@ class Seg<T> extends StatelessWidget {
 /// Переключатель вкл/выкл.
 class Toggle extends StatelessWidget {
   final bool v;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const Toggle(this.v, this.onTap, {super.key});
   @override
   Widget build(BuildContext context) => Press(
