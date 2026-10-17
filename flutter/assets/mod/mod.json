@@ -1,1 +1,65 @@
-{"version": 1}
+{
+  "version": 1,
+  "units": [
+    {
+      "id": "tank_t90m",
+      "cls": "tank",
+      "side": 1,
+      "name": "Т-90М",
+      "desc": "125 мм, экипаж 3",
+      "hint": "Лучшая броня РФ",
+      "cost": 370.0,
+      "delay": 15.0,
+      "speed": 22.0,
+      "vision": 460.0,
+      "morale": 100.0,
+      "men": [
+        {
+          "job": "driver",
+          "w": [],
+          "a": {}
+        },
+        {
+          "job": "gunner",
+          "w": [
+            "d81",
+            "pkt"
+          ],
+          "a": {
+            "apfsds125": 20,
+            "heat125": 8,
+            "he125": 15,
+            "sa762": 1250
+          }
+        },
+        {
+          "job": "commander",
+          "w": [
+            "nsvt"
+          ],
+          "a": {
+            "sa127": 300
+          }
+        }
+      ],
+      "veh": true,
+      "wheeled": false,
+      "cap": 0,
+      "len": 31.0,
+      "wid": 14.0,
+      "vuln": 0.3,
+      "stealth": 0.0,
+      "arm": "t90m",
+      "art": {
+        "hull": "mod/art/tank_t90m_hull.png",
+        "scale": 0.79,
+        "turret": "mod/art/tank_t90m_turret.png",
+        "tscale": 1.0,
+        "tx": 0.014,
+        "px": 0.3,
+        "py": 0.504
+      }
+    }
+  ],
+  "removed": []
+}
