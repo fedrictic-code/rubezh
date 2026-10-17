@@ -1,0 +1,6 @@
+00:00 +0: loading /home/runner/work/rubezh/rubezh/editor/test/editor_test.dart
+00:00 +0: slug и sha как у git
+00:00 +1: распознавание местности по цветам
+00:00 +2: рабочая папка: юнит в моде и обратно
+00:00 +3: редактор открывается
+00:00 +4: All tests passed!
