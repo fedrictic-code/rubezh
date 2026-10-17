@@ -1,0 +1,3 @@
+
+Building Windows application...                                    97.3s
+√ Built build\windows\x64\runner\Release\rubezh_editor.exe

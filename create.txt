@@ -1,0 +1,71 @@
+
+  ╔════════════════════════════════════════════════════════════════════════════╗
+  ║                 Welcome to Flutter! - https://flutter.dev                  ║
+  ║                                                                            ║
+  ║ The Flutter tool uses Google Analytics to anonymously report feature usage ║
+  ║ statistics and basic crash reports. This data is used to help improve      ║
+  ║ Flutter tools over time.                                                   ║
+  ║                                                                            ║
+  ║ Flutter tool analytics are not sent on the very first run. To disable      ║
+  ║ reporting, type 'flutter config --no-analytics'. To display the current    ║
+  ║ setting, type 'flutter config'. If you opt out of analytics, an opt-out    ║
+  ║ event will be sent, and then no further information will be sent by the    ║
+  ║ Flutter tool.                                                              ║
+  ║                                                                            ║
+  ║ By downloading the Flutter SDK, you agree to the Google Terms of Service.  ║
+  ║ The Google Privacy Policy describes how data is handled in this service.   ║
+  ║                                                                            ║
+  ║ Moreover, Flutter includes the Dart SDK, which may send usage metrics and  ║
+  ║ crash reports to Google.                                                   ║
+  ║                                                                            ║
+  ║ Read about data we send with crash reports:                                ║
+  ║ https://flutter.dev/to/crash-reporting                                     ║
+  ║                                                                            ║
+  ║ See Google's privacy policy:                                               ║
+  ║ https://policies.google.com/privacy                                        ║
+  ║                                                                            ║
+  ║ To disable animations in this tool, use                                    ║
+  ║ 'flutter config --no-cli-animations'.                                      ║
+  ╚════════════════════════════════════════════════════════════════════════════╝
+
+Recreating project ....
+  .gitignore (created)
+  .idea\libraries\Dart_SDK.xml (created)
+  .idea\libraries\KotlinJavaRuntime.xml (created)
+  .idea\modules.xml (created)
+  .idea\runConfigurations\main_dart.xml (created)
+  .idea\workspace.xml (created)
+  rubezh_editor.iml (created)
+  windows\.gitignore (created)
+  windows\CMakeLists.txt (created)
+  windows\flutter\CMakeLists.txt (created)
+  windows\runner\CMakeLists.txt (created)
+  windows\runner\flutter_window.cpp (created)
+  windows\runner\flutter_window.h (created)
+  windows\runner\main.cpp (created)
+  windows\runner\resource.h (created)
+  windows\runner\resources\app_icon.ico (created)
+  windows\runner\runner.exe.manifest (created)
+  windows\runner\Runner.rc (created)
+  windows\runner\utils.cpp (created)
+  windows\runner\utils.h (created)
+  windows\runner\win32_window.cpp (created)
+  windows\runner\win32_window.h (created)
+  test\widget_test.dart (created)
+Resolving dependencies...
+Downloading packages...
+Got dependencies.
+Wrote 23 files.
+
+All done!
+You can find general documentation for Flutter at: https://docs.flutter.dev/
+Detailed API documentation is available at: https://api.flutter.dev/
+If you prefer video documentation, consider: https://www.youtube.com/c/flutterdev
+
+In order to run your application, type:
+
+  $ cd .
+  $ flutter run
+
+Your application code is in .\lib\main.dart.
+
